@@ -2,16 +2,6 @@ import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const C = {
-  dark: "#1a1a2e",
-  blue: "#0f3460",
-  accent: "#e94560",
-  border: "#dee2e6",
-  muted: "#6c757d",
-  text: "#212529",
-  green: "#198754",
-  red: "#dc3545",
-};
 
 const INIT_PRODUCTS = [
   {
