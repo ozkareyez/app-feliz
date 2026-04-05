@@ -177,7 +177,6 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
     M = 18,
     CW = W - M * 2;
   var y = 0;
-
   doc.setFillColor(26, 26, 46);
   doc.rect(0, 0, W, 42, "F");
   doc.setFillColor(233, 69, 96);
@@ -210,7 +209,6 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   doc.text("Fecha: " + td, W - M, 31, { align: "right" });
   doc.text("Reserva: " + reservation.id, W - M, 36, { align: "right" });
   y = 50;
-
   var boxH = 34;
   doc.setFillColor(248, 249, 250);
   doc.roundedRect(M, y, CW / 2 - 3, boxH, 2, 2, "F");
@@ -231,7 +229,6 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   doc.text("Tel: " + reservation.phone, M + 4, y + 19);
   doc.text("Evento: " + reservation.event, M + 4, y + 25);
   doc.text("Lugar: " + reservation.location, M + 4, y + 31);
-
   var ex = M + CW / 2 + 3;
   doc.setFillColor(248, 249, 250);
   doc.roundedRect(ex, y, CW / 2 - 3, boxH, 2, 2, "F");
@@ -251,7 +248,6 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
     y + 25,
   );
   y += boxH + 8;
-
   var subtotal = 0;
   var tableRows = reservation.items.map(function (item) {
     var days =
@@ -291,10 +287,8 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
     styles: { lineColor: [222, 226, 230], lineWidth: 0.3 },
   });
   y = doc.lastAutoTable.finalY + 4;
-
   var bboAmt = subtotal * 0.015;
   var totalDue = subtotal + bboAmt - deposit;
-
   function drawRow(label, value, hi) {
     if (hi) {
       doc.setFillColor(26, 26, 46);
@@ -328,7 +322,6 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
     drawRow("Deposito pagado", "- AWG " + deposit.toFixed(2), false);
   drawRow("TOTAL A PAGAR", "AWG " + totalDue.toFixed(2), true);
   y += 6;
-
   doc.setFillColor(248, 249, 250);
   doc.rect(M, y, CW, 18, "F");
   doc.setDrawColor(222, 226, 230);
@@ -392,91 +385,511 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   doc.save(invoiceNum + "_" + reservation.client.replace(/\s/g, "_") + ".pdf");
 }
 
-const css = [
-  "@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');",
-  "*{box-sizing:border-box;margin:0;padding:0}",
-  "body{font-family:'DM Sans',sans-serif;background:#f0f2f5;min-height:100vh}",
-  ".app{max-width:900px;margin:0 auto;padding:12px}",
-  ".topbar{background:#1a1a2e;color:#fff;border-radius:12px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}",
-  ".topbar-title{font-size:17px;font-weight:600}",
-  ".topbar-sub{font-size:12px;color:#adb5bd;margin-top:2px}",
-  ".accent-dot{display:inline-block;width:8px;height:8px;background:#e94560;border-radius:50%;margin-right:6px}",
-  ".tabs{display:flex;gap:4px;margin-bottom:14px;background:#fff;border-radius:10px;padding:4px;border:0.5px solid #dee2e6}",
-  ".tab{flex:1;padding:8px 4px;font-size:13px;font-weight:500;border:none;background:none;border-radius:7px;cursor:pointer;color:#6c757d;transition:all .15s}",
-  ".tab.active{background:#1a1a2e;color:#fff}",
-  ".card{background:#fff;border:0.5px solid #dee2e6;border-radius:12px;padding:16px;margin-bottom:12px}",
-  ".metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}",
-  ".metric{background:#f8f9fa;border-radius:8px;padding:12px}",
-  ".metric-label{font-size:11px;color:#6c757d;margin-bottom:4px}",
-  ".metric-val{font-size:22px;font-weight:600;color:#212529}",
-  ".metric-val.red{color:#dc3545}",
-  ".metric-val.green{color:#198754}",
-  ".alert-item{border-left:3px solid;border-radius:8px;padding:10px 14px;margin-bottom:8px;background:#f8f9fa}",
-  ".alert-item.danger{border-color:#e94560}",
-  ".alert-item.warning{border-color:#fd7e14}",
-  ".alert-item.info{border-color:#0d6efd}",
-  ".alert-title{font-size:13px;font-weight:600;margin-bottom:3px}",
-  ".alert-sub{font-size:12px;color:#6c757d}",
-  ".badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:500;margin-left:6px}",
-  ".badge-danger{background:#fff0f0;color:#dc3545}",
-  ".badge-warning{background:#fff8f0;color:#fd7e14}",
-  ".badge-info{background:#e8f4ff;color:#0d6efd}",
-  ".badge-success{background:#eafaf1;color:#198754}",
-  ".row-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}",
-  ".btn{padding:6px 14px;font-size:12px;font-weight:500;border:0.5px solid #dee2e6;border-radius:8px;background:#fff;color:#212529;cursor:pointer;transition:all .12s}",
-  ".btn:hover{background:#f8f9fa}",
-  ".btn-primary{background:#1a1a2e;color:#fff;border-color:#1a1a2e}",
-  ".btn-primary:hover{background:#0f3460}",
-  ".btn-accent{background:#e94560;color:#fff;border-color:#e94560}",
-  ".btn-accent:hover{opacity:.9}",
-  ".btn-sm{padding:4px 10px;font-size:11px}",
-  ".btn-wa{background:#25d366;color:#fff;border-color:#25d366}",
-  "label{display:block;font-size:12px;color:#6c757d;margin-bottom:3px;margin-top:10px}",
-  "input,select,textarea{width:100%;padding:8px 10px;border:0.5px solid #dee2e6;border-radius:8px;font-size:13px;background:#fff;color:#212529;outline:none}",
-  "input:focus,select:focus,textarea:focus{border-color:#0f3460;box-shadow:0 0 0 2px rgba(15,52,96,.1)}",
-  ".form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}",
-  ".inv-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid #dee2e6}",
-  ".inv-row:last-child{border:none}",
-  ".progress{height:5px;background:#f0f2f5;border-radius:3px;overflow:hidden;width:70px}",
-  ".progress-fill{height:100%;border-radius:3px}",
-  ".res-card{background:#fff;border:0.5px solid #dee2e6;border-radius:10px;padding:14px;margin-bottom:10px}",
-  ".res-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}",
-  ".res-id{font-size:11px;color:#6c757d;font-family:'DM Mono',monospace}",
-  ".res-client{font-size:14px;font-weight:600;margin-bottom:2px}",
-  ".res-event{font-size:12px;color:#6c757d}",
-  ".res-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;font-size:12px;color:#6c757d}",
-  ".res-items{font-size:12px;color:#212529;background:#f8f9fa;border-radius:6px;padding:8px;margin-bottom:8px}",
-  ".section-title{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}",
-  "table{width:100%;border-collapse:collapse;font-size:13px}",
-  "th{font-size:11px;font-weight:500;color:#6c757d;text-align:left;padding:6px 4px;border-bottom:0.5px solid #dee2e6}",
-  "td{padding:10px 4px;border-bottom:0.5px solid #dee2e6;vertical-align:middle}",
-  ".empty{text-align:center;color:#6c757d;font-size:13px;padding:2rem}",
-  ".notification{position:fixed;top:16px;right:16px;background:#1a1a2e;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:999;border-left:3px solid #e94560;animation:slideIn .2s ease}",
-  ".modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s}",
-  ".modal-content{background:#fff;border-radius:16px;max-width:500px;width:90%;max-height:85vh;overflow:auto;animation:slideUp .3s}",
-  ".modal-header{background:#1a1a2e;color:#fff;padding:20px 24px;border-radius:16px 16px 0 0;position:relative}",
-  ".modal-header h2{margin:0;font-size:18px;font-weight:600}",
-  ".modal-close{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:24px;cursor:pointer;opacity:0.8}",
-  ".modal-body{padding:24px}",
-  ".modal-section{margin-bottom:20px}",
-  ".modal-section-title{font-size:12px;text-transform:uppercase;color:#888;margin-bottom:8px;letter-spacing:0.5px}",
-  ".modal-info{display:grid;grid-template-columns:1fr 1fr;gap:12px}",
-  ".modal-info-item{background:#f8f9fa;padding:12px;border-radius:8px}",
-  ".modal-info-label{font-size:11px;color:#666;margin-bottom:4px}",
-  ".modal-info-value{font-size:14px;font-weight:600;color:#1a1a2e}",
-  ".modal-products{border:1px solid #e0e0e0;border-radius:10px;overflow:hidden}",
-  ".modal-product-header{background:#f0f0f0;display:grid;grid-template-columns:1fr 80px 80px;padding:10px 16px;font-size:11px;font-weight:600;color:#666;text-transform:uppercase}",
-  ".modal-product-row{display:grid;grid-template-columns:1fr 80px 80px;padding:12px 16px;border-top:1px solid #e0e0e0;font-size:13px}",
-  ".modal-product-row:nth-child(even){background:#fafafa}",
-  ".modal-product-qty{color:#2563eb;font-weight:600}",
-  ".modal-product-price{color:#059669;font-weight:600}",
-  ".modal-total{background:#1a1a2e;color:#fff;padding:16px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}",
-  ".modal-total-label{font-size:14px}",
-  ".modal-total-value{font-size:20px;font-weight:700}",
-  "@keyframes fadeIn{from{opacity:0}to{opacity:1}}",
-  "@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}",
-  "@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}",
-].join("\n");
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const T = {
+  // Backgrounds
+  bg0: "#0b0f1a", // page bg
+  bg1: "#111827", // surface
+  bg2: "#161d2e", // card
+  bg3: "#1e2740", // elevated / input
+  bgHov: "#1a2236", // hover state
+
+  // Brand
+  accent: "#e94560",
+  accentDim: "rgba(233,69,96,0.12)",
+  accentBorder: "rgba(233,69,96,0.35)",
+
+  // Text
+  t1: "#f0f2f8", // primary
+  t2: "#8892a4", // secondary
+  t3: "#4e5a70", // tertiary / placeholder
+
+  // Borders
+  b1: "rgba(255,255,255,0.07)",
+  b2: "rgba(255,255,255,0.12)",
+
+  // Semantic
+  green: "#34d399",
+  greenDim: "rgba(52,211,153,0.12)",
+  greenBorder: "rgba(52,211,153,0.3)",
+  amber: "#f59e0b",
+  amberDim: "rgba(245,158,11,0.12)",
+  amberBorder: "rgba(245,158,11,0.3)",
+  red: "#f87171",
+  redDim: "rgba(248,113,113,0.12)",
+  redBorder: "rgba(248,113,113,0.3)",
+  blue: "#60a5fa",
+  blueDim: "rgba(96,165,250,0.12)",
+  blueBorder: "rgba(96,165,250,0.3)",
+};
+
+const css = `
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: ${T.bg0};
+  color: ${T.t1};
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 16px 14px 40px;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: ${T.bg1};
+  border: 1px solid ${T.b1};
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.accent-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: ${T.accent};
+  box-shadow: 0 0 8px ${T.accent}88;
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 16px; font-weight: 600; color: ${T.t1}; letter-spacing: -0.01em; }
+.topbar-sub { font-size: 11px; color: ${T.t3}; margin-top: 2px; }
+.topbar-right { text-align: right; }
+.topbar-date { font-size: 11px; color: ${T.t3}; }
+.topbar-alert { font-size: 11px; color: ${T.accent}; font-weight: 500; margin-top: 3px; }
+.topbar-alert.ok { color: ${T.green}; }
+
+/* ── NAV TABS ── */
+.tabs {
+  display: flex;
+  background: ${T.bg1};
+  border: 1px solid ${T.b1};
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1;
+  min-width: 64px;
+  padding: 7px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: ${T.t3};
+  transition: all .15s;
+  white-space: nowrap;
+  text-align: center;
+}
+.tab:hover { color: ${T.t2}; background: ${T.bgHov}; }
+.tab.active {
+  background: ${T.bg3};
+  color: ${T.t1};
+  border-bottom: 2px solid ${T.accent};
+  padding-bottom: 5px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: ${T.bg2};
+  border: 1px solid ${T.b1};
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+/* ── KPI METRICS ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.metric {
+  background: ${T.bg2};
+  border: 1px solid ${T.b1};
+  border-radius: 12px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.metric::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  border-radius: 12px 0 0 12px;
+}
+.metric.neutral::before { background: ${T.t3}; }
+.metric.alert::before   { background: ${T.accent}; }
+.metric.income::before  { background: ${T.green}; }
+.metric-label {
+  font-size: 10px;
+  color: ${T.t3};
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.metric-val { font-size: 26px; font-weight: 600; color: ${T.t1}; letter-spacing: -0.02em; }
+.metric-val.accent { color: ${T.accent}; }
+.metric-val.green  { color: ${T.green};  }
+.metric-hint { font-size: 10px; color: ${T.t3}; margin-top: 4px; }
+
+/* ── SECTION TITLES ── */
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: ${T.t3};
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ── ALERT ITEMS (dashboard / alertas) ── */
+.alert-item {
+  border-left: 2px solid;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: ${T.bg3};
+}
+.alert-item.danger  { border-color: ${T.accent};  }
+.alert-item.warning { border-color: ${T.amber};   }
+.alert-item.info    { border-color: ${T.blue};    }
+.alert-title { font-size: 13px; font-weight: 600; color: ${T.t1}; margin-bottom: 3px; }
+.alert-sub   { font-size: 12px; color: ${T.t2}; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.badge-danger  { background: ${T.redDim};   color: ${T.red};   border: 1px solid ${T.redBorder};   }
+.badge-warning { background: ${T.amberDim}; color: ${T.amber}; border: 1px solid ${T.amberBorder}; }
+.badge-info    { background: ${T.blueDim};  color: ${T.blue};  border: 1px solid ${T.blueBorder};  }
+.badge-success { background: ${T.greenDim}; color: ${T.green}; border: 1px solid ${T.greenBorder}; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid ${T.b2};
+  border-radius: 8px;
+  background: ${T.bg3};
+  color: ${T.t2};
+  cursor: pointer;
+  transition: all .13s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.btn:hover { background: ${T.bgHov}; color: ${T.t1}; border-color: ${T.b2}; }
+
+/* Primary — dark fill, used for main form submit */
+.btn-primary {
+  background: ${T.bg3};
+  color: ${T.t1};
+  border-color: ${T.b2};
+}
+.btn-primary:hover { background: #243050; }
+
+/* Accent — brand red, one per section max */
+.btn-accent {
+  background: ${T.accentDim};
+  color: ${T.accent};
+  border-color: ${T.accentBorder};
+}
+.btn-accent:hover { background: rgba(233,69,96,0.2); }
+
+/* Ghost green (WhatsApp) */
+.btn-wa {
+  background: rgba(52,211,153,0.08);
+  color: ${T.green};
+  border-color: ${T.greenBorder};
+}
+.btn-wa:hover { background: rgba(52,211,153,0.15); }
+
+/* Ghost blue (Twilio) */
+.btn-twilio {
+  background: rgba(96,165,250,0.08);
+  color: ${T.blue};
+  border-color: ${T.blueBorder};
+}
+.btn-twilio:hover { background: rgba(96,165,250,0.15); }
+
+.btn-sm { padding: 5px 11px; font-size: 11px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.row-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+/* ── FORM ELEMENTS ── */
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: ${T.t3};
+  margin-bottom: 5px;
+  margin-top: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid ${T.b2};
+  border-radius: 9px;
+  font-size: 13px;
+  background: ${T.bg3};
+  color: ${T.t1};
+  outline: none;
+  font-family: inherit;
+  transition: border-color .13s, box-shadow .13s;
+}
+input::placeholder { color: ${T.t3}; }
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(233,69,96,0.5);
+  box-shadow: 0 0 0 3px rgba(233,69,96,0.08);
+}
+select option { background: ${T.bg3}; color: ${T.t1}; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── INVENTORY TABLE ── */
+.inv-table-wrap {
+  background: ${T.bg2};
+  border: 1px solid ${T.b1};
+  border-radius: 14px;
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  font-size: 10px;
+  font-weight: 600;
+  color: ${T.t3};
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid ${T.b1};
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: ${T.bg1};
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid ${T.b1};
+  vertical-align: middle;
+  color: ${T.t1};
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: ${T.bgHov}; }
+
+.progress { height: 4px; background: ${T.bg0}; border-radius: 2px; overflow: hidden; width: 60px; }
+.progress-fill { height: 100%; border-radius: 2px; }
+
+/* ── RESERVATION CARDS ── */
+.res-card {
+  background: ${T.bg2};
+  border: 1px solid ${T.b1};
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: border-color .13s;
+}
+.res-card:hover { border-color: ${T.b2}; }
+.res-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.res-id {
+  font-size: 10px;
+  color: ${T.t3};
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 3px;
+  letter-spacing: 0.05em;
+}
+.res-client { font-size: 14px; font-weight: 600; color: ${T.t1}; margin-bottom: 2px; }
+.res-event  { font-size: 12px; color: ${T.t2}; }
+.res-amount { font-size: 15px; font-weight: 600; color: ${T.green}; margin-top: 4px; }
+.res-amount-sub { font-size: 10px; color: ${T.t3}; margin-top: 1px; }
+.res-details {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0;
+  font-size: 11px;
+  color: ${T.t3};
+}
+.res-items {
+  font-size: 12px;
+  color: ${T.t2};
+  background: ${T.bg3};
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+
+/* ── EMPTY STATE ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  color: ${T.t3};
+  font-size: 13px;
+}
+.empty-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: ${T.bg3};
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  color: ${T.t3};
+}
+.empty-label { font-weight: 500; color: ${T.t2}; }
+.empty-sub { font-size: 11px; }
+
+/* ── TOTAL SUMMARY BOX ── */
+.total-box {
+  background: ${T.bg3};
+  border: 1px solid ${T.b1};
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.total-row { display: flex; justify-content: space-between; padding: 3px 0; color: ${T.t2}; }
+.total-row.main { color: ${T.t1}; font-weight: 600; border-top: 1px solid ${T.b1}; margin-top: 6px; padding-top: 8px; font-size: 14px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  animation: fadeIn .18s ease;
+  padding: 16px;
+}
+.modal-content {
+  background: ${T.bg2};
+  border: 1px solid ${T.b2};
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 88vh;
+  overflow: auto;
+  animation: slideUp .22s ease;
+}
+.modal-header {
+  background: ${T.bg1};
+  border-bottom: 1px solid ${T.b1};
+  padding: 18px 20px;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h2 { font-size: 15px; font-weight: 600; color: ${T.t1}; }
+.modal-close {
+  background: none; border: none; color: ${T.t3};
+  font-size: 20px; cursor: pointer; line-height: 1; padding: 2px;
+}
+.modal-close:hover { color: ${T.t1}; }
+.modal-body { padding: 20px; }
+.modal-section { margin-bottom: 18px; }
+.modal-section-title {
+  font-size: 10px; font-weight: 600; color: ${T.t3};
+  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+}
+.modal-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.modal-info-item {
+  background: ${T.bg3};
+  border: 1px solid ${T.b1};
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.modal-info-label { font-size: 10px; color: ${T.t3}; margin-bottom: 3px; }
+.modal-info-value { font-size: 13px; font-weight: 600; color: ${T.t1}; }
+.modal-products {
+  background: ${T.bg3};
+  border: 1px solid ${T.b1};
+  border-radius: 10px;
+  overflow: hidden;
+}
+.modal-product-header {
+  background: ${T.bg1};
+  display: grid; grid-template-columns: 1fr 60px 80px;
+  padding: 8px 14px;
+  font-size: 10px; font-weight: 600; color: ${T.t3};
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.modal-product-row {
+  display: grid; grid-template-columns: 1fr 60px 80px;
+  padding: 10px 14px;
+  border-top: 1px solid ${T.b1};
+  font-size: 12px; color: ${T.t1};
+}
+.modal-product-qty   { color: ${T.blue};  font-weight: 600; text-align: center; }
+.modal-product-price { color: ${T.green}; font-weight: 600; text-align: right;  }
+.modal-total {
+  background: ${T.bg1};
+  border: 1px solid ${T.b1};
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px;
+}
+.modal-total-label { font-size: 13px; color: ${T.t2}; }
+.modal-total-value { font-size: 18px; font-weight: 700; color: ${T.green}; }
+
+/* ── NOTIFICATION ── */
+.notification {
+  position: fixed; top: 16px; right: 16px;
+  background: ${T.bg1};
+  color: ${T.t1};
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  z-index: 9999;
+  border: 1px solid ${T.b2};
+  border-left: 3px solid ${T.accent};
+  animation: slideIn .2s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* ── INLINE DIVIDER ── */
+.inv-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid ${T.b1};
+}
+.inv-row:last-child { border: none; }
+
+@keyframes fadeIn  { from { opacity: 0 }             to { opacity: 1 } }
+@keyframes slideUp { from { transform: translateY(24px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0 } to { transform: translateX(0); opacity: 1 } }
+`;
 
 export default function App() {
   var initProducts = function () {
@@ -492,28 +905,14 @@ export default function App() {
     return s ? parseInt(s) : 43;
   };
 
-  var tabState = useState("dashboard");
-  var tab = tabState[0];
-  var setTab = tabState[1];
-  var prodState = useState(initProducts);
-  var products = prodState[0];
-  var setProducts = prodState[1];
-  var resState = useState(initReservations);
-  var reservations = resState[0];
-  var setReservations = resState[1];
-  var notifState = useState(null);
-  var notification = notifState[0];
-  var setNotification = notifState[1];
-  var cntState = useState(initCounter);
-  var invoiceCounter = cntState[0];
-  var setInvoiceCounter = cntState[1];
-  var waState = useState(false);
-  var sendingWA = waState[0];
-  var setSendingWA = waState[1];
-  var alertState = useState(null);
-  var selectedAlert = alertState[0];
-  var setSelectedAlert = alertState[1];
-  var formState = useState({
+  var [tab, setTab] = useState("dashboard");
+  var [products, setProducts] = useState(initProducts);
+  var [reservations, setReservations] = useState(initReservations);
+  var [notification, setNotification] = useState(null);
+  var [invoiceCounter, setInvoiceCounter] = useState(initCounter);
+  var [sendingWA, setSendingWA] = useState(false);
+  var [selectedAlert, setSelectedAlert] = useState(null);
+  var [form, setForm] = useState({
     client: "",
     phone: "",
     event: "",
@@ -522,11 +921,12 @@ export default function App() {
     pickup: "",
     items: [{ name: "", qty: 1, days: 1, price: 0 }],
   });
-  var form = formState[0];
-  var setForm = formState[1];
-  var pfState = useState({ name: "", total: 0, price: 0, unit: "unidad" });
-  var pForm = pfState[0];
-  var setPForm = pfState[1];
+  var [pForm, setPForm] = useState({
+    name: "",
+    total: 0,
+    price: 0,
+    unit: "unidad",
+  });
 
   useEffect(
     function () {
@@ -661,7 +1061,7 @@ export default function App() {
       return c + 1;
     });
     generateInvoicePDF(res, num, 0, "");
-    notify("Factura " + num + " descargada en Descargas");
+    notify("Factura " + num + " descargada");
   }
 
   function addReservation() {
@@ -745,198 +1145,228 @@ export default function App() {
     });
   }
 
+  var totalAlerts = pickupAlerts.length + lowStock.length;
+
   return (
     <>
       <style>{css}</style>
       {notification && <div className="notification">{notification}</div>}
+
       <div className="app">
+        {/* TOP BAR */}
         <div className="topbar">
-          <div>
-            <div className="topbar-title">
-              <span className="accent-dot" />
-              Feliz Enterprise
-            </div>
-            <div className="topbar-sub">
-              Sistema de inventario y facturacion - DIMP Aruba
+          <div className="topbar-left">
+            <div className="accent-dot" />
+            <div>
+              <div className="topbar-title">Feliz Enterprise</div>
+              <div className="topbar-sub">
+                Inventario y facturación · DIMP Aruba
+              </div>
             </div>
           </div>
-          <div style={{ textAlign: "right", fontSize: 12, color: "#adb5bd" }}>
-            <div>
+          <div className="topbar-right">
+            <div className="topbar-date">
               {new Date().toLocaleDateString("es-AW", {
-                weekday: "long",
+                weekday: "short",
                 day: "2-digit",
-                month: "long",
+                month: "short",
               })}
             </div>
-            <div style={{ color: "#e94560", fontWeight: 500 }}>
-              {pickupAlerts.length} alerta{pickupAlerts.length !== 1 ? "s" : ""}{" "}
-              activa{pickupAlerts.length !== 1 ? "s" : ""}
+            <div className={"topbar-alert" + (totalAlerts === 0 ? " ok" : "")}>
+              {totalAlerts === 0
+                ? "✓ Sin alertas"
+                : `● ${totalAlerts} alerta${totalAlerts !== 1 ? "s" : ""}`}
             </div>
           </div>
         </div>
 
+        {/* NAV */}
         <div className="tabs">
           {[
             ["dashboard", "Dashboard"],
             ["inventario", "Inventario"],
-            ["nueva-reserva", "Nueva reserva"],
+            ["nueva-reserva", "+ Reserva"],
             ["reservas", "Reservas"],
             [
               "alertas",
-              "Alertas (" + (pickupAlerts.length + lowStock.length) + ")",
+              `Alertas${totalAlerts > 0 ? " (" + totalAlerts + ")" : ""}`,
             ],
-          ].map(function (p) {
+          ].map(function ([key, label]) {
             return (
               <button
-                key={p[0]}
-                className={"tab" + (tab === p[0] ? " active" : "")}
+                key={key}
+                className={"tab" + (tab === key ? " active" : "")}
                 onClick={function () {
-                  setTab(p[0]);
+                  setTab(key);
                 }}
               >
-                {p[1]}
+                {label}
               </button>
             );
           })}
         </div>
 
+        {/* ── DASHBOARD ── */}
         {tab === "dashboard" && (
           <>
             <div className="metrics">
-              <div className="metric">
+              <div className="metric neutral">
                 <div className="metric-label">Reservas activas</div>
                 <div className="metric-val">{activeRes}</div>
+                <div className="metric-hint">en curso</div>
               </div>
-              <div className="metric">
+              <div
+                className={
+                  "metric" + (todayPickups > 0 ? " alert" : " neutral")
+                }
+              >
                 <div className="metric-label">Recogidas hoy</div>
                 <div
-                  className={
-                    "metric-val" + (todayPickups > 0 ? " red" : " green")
-                  }
+                  className={"metric-val" + (todayPickups > 0 ? " accent" : "")}
                 >
                   {todayPickups}
                 </div>
-              </div>
-              <div className="metric">
-                <div className="metric-label">Ingresos estimados (AWG)</div>
-                <div className="metric-val green">
-                  {monthRevenue.toFixed(0)}
+                <div className="metric-hint">
+                  {todayPickups > 0 ? "pendientes" : "al día"}
                 </div>
               </div>
+              <div className="metric income">
+                <div className="metric-label">Ingresos est.</div>
+                <div className="metric-val green">
+                  {monthRevenue.toLocaleString("en-AW", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </div>
+                <div className="metric-hint">AWG total</div>
+              </div>
             </div>
+
             <div className="card">
-              <div className="section-title">Recogidas proximas</div>
-              {pickupAlerts.length === 0 && (
-                <div className="empty">No hay recogidas urgentes</div>
-              )}
-              {pickupAlerts.map(function (r) {
-                return (
-                  <div key={r.id} className={"alert-item " + alertLevel(r)}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <div className="alert-title">
-                        {r.client} - {r.event}
-                      </div>
-                      <span className={"badge badge-" + alertLevel(r)}>
-                        {isToday(r.pickup) ? "HOY" : "Manana"}
-                      </span>
-                    </div>
-                    <div className="alert-sub">
-                      {r.location} -{" "}
-                      {r.items
-                        .map(function (i) {
-                          return i.qty + "x " + i.name;
-                        })
-                        .join(", ")}
-                    </div>
-                    <div className="row-actions">
-                      <button
-                        className="btn btn-sm btn-wa"
-                        onClick={function () {
-                          openWhatsApp(r.phone, buildWAMsg(r));
-                        }}
-                      >
-                        WhatsApp Web
-                      </button>
-                      <button
-                        className="btn btn-sm"
-                        disabled={sendingWA}
+              <div className="section-title">Recogidas próximas</div>
+              {pickupAlerts.length === 0 ? (
+                <div className="empty">
+                  <div className="empty-icon">✓</div>
+                  <div className="empty-label">Todo al día</div>
+                  <div className="empty-sub">Sin recogidas urgentes</div>
+                </div>
+              ) : (
+                pickupAlerts.map(function (r) {
+                  return (
+                    <div key={r.id} className={"alert-item " + alertLevel(r)}>
+                      <div
                         style={{
-                          background: "#0088cc",
-                          color: "#fff",
-                          borderColor: "#0088cc",
-                          opacity: sendingWA ? 0.7 : 1,
-                        }}
-                        onClick={function () {
-                          sendTwilioReminder(r);
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
                         }}
                       >
-                        {sendingWA ? "Enviando..." : "Twilio WA"}
-                      </button>
-                      <button
-                        className="btn btn-sm"
-                        onClick={function () {
-                          markPickedUp(r.id);
-                        }}
-                      >
-                        Marcar recogido
-                      </button>
-                      <button
-                        className="btn btn-sm btn-accent"
-                        onClick={function () {
-                          handleGeneratePDF(r);
-                        }}
-                      >
-                        Descargar factura PDF
-                      </button>
+                        <div className="alert-title">
+                          {r.client} — {r.event}
+                        </div>
+                        <span className={"badge badge-" + alertLevel(r)}>
+                          {isToday(r.pickup) ? "HOY" : "Mañana"}
+                        </span>
+                      </div>
+                      <div className="alert-sub" style={{ marginTop: 2 }}>
+                        {r.location} ·{" "}
+                        {r.items
+                          .map(function (i) {
+                            return i.qty + "× " + i.name;
+                          })
+                          .join(", ")}
+                      </div>
+                      <div className="row-actions">
+                        <button
+                          className="btn btn-sm btn-wa"
+                          onClick={function () {
+                            openWhatsApp(r.phone, buildWAMsg(r));
+                          }}
+                        >
+                          WhatsApp
+                        </button>
+                        <button
+                          className="btn btn-sm btn-twilio"
+                          disabled={sendingWA}
+                          onClick={function () {
+                            sendTwilioReminder(r);
+                          }}
+                        >
+                          {sendingWA ? "Enviando…" : "Twilio WA"}
+                        </button>
+                        <button
+                          className="btn btn-sm"
+                          onClick={function () {
+                            markPickedUp(r.id);
+                          }}
+                        >
+                          Marcar recogido
+                        </button>
+                        <button
+                          className="btn btn-sm btn-accent"
+                          onClick={function () {
+                            handleGeneratePDF(r);
+                          }}
+                        >
+                          PDF
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
+
             <div className="card">
               <div className="section-title">Stock bajo</div>
-              {lowStock.length === 0 && (
-                <div className="empty">Todo el inventario esta bien</div>
-              )}
-              {lowStock.map(function (p) {
-                var avail = p.total - p.rented;
-                var pct = (avail / p.total) * 100;
-                return (
-                  <div key={p.id} className="inv-row">
-                    <span style={{ fontSize: 13 }}>{p.name}</span>
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 10 }}
-                    >
-                      <div className="progress">
-                        <div
-                          className="progress-fill"
-                          style={{
-                            width: pct + "%",
-                            background: pct < 15 ? "#dc3545" : "#fd7e14",
-                          }}
-                        />
-                      </div>
-                      <span
-                        className={
-                          "badge " +
-                          (pct < 15 ? "badge-danger" : "badge-warning")
-                        }
-                      >
-                        {avail} / {p.total}
+              {lowStock.length === 0 ? (
+                <div className="empty">
+                  <div className="empty-icon">✓</div>
+                  <div className="empty-label">Inventario en buen estado</div>
+                </div>
+              ) : (
+                lowStock.map(function (p) {
+                  var avail = p.total - p.rented;
+                  var pct = (avail / p.total) * 100;
+                  return (
+                    <div key={p.id} className="inv-row">
+                      <span style={{ fontSize: 13, color: T.t1 }}>
+                        {p.name}
                       </span>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <div className="progress">
+                          <div
+                            className="progress-fill"
+                            style={{
+                              width: pct + "%",
+                              background: pct < 15 ? T.accent : T.amber,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className={
+                            "badge " +
+                            (pct < 15 ? "badge-danger" : "badge-warning")
+                          }
+                        >
+                          {avail} / {p.total}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </>
         )}
 
+        {/* ── INVENTARIO ── */}
         {tab === "inventario" && (
           <>
             <div className="card">
@@ -985,7 +1415,7 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <label>Precio por dia (AWG)</label>
+                  <label>Precio por día (AWG)</label>
                   <input
                     type="number"
                     min="0"
@@ -1000,22 +1430,23 @@ export default function App() {
                 </div>
               </div>
               <button
-                className="btn btn-primary"
-                style={{ marginTop: 10 }}
+                className="btn btn-accent"
+                style={{ marginTop: 14 }}
                 onClick={addProduct}
               >
                 + Agregar producto
               </button>
             </div>
-            <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+
+            <div className="inv-table-wrap">
               <table>
                 <thead>
-                  <tr style={{ background: "#f8f9fa" }}>
+                  <tr>
                     <th style={{ padding: "10px 14px" }}>Producto</th>
-                    <th style={{ padding: "10px 8px" }}>Total</th>
-                    <th style={{ padding: "10px 8px" }}>Disponible</th>
-                    <th style={{ padding: "10px 8px" }}>Precio/dia AWG</th>
-                    <th style={{ padding: "10px 8px" }}>Estado</th>
+                    <th>Total</th>
+                    <th>Disponible</th>
+                    <th>Precio / día</th>
+                    <th>Estado</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1024,16 +1455,14 @@ export default function App() {
                     var pct = avail / p.total;
                     return (
                       <tr key={p.id}>
-                        <td style={{ padding: "10px 14px", fontWeight: 500 }}>
-                          {p.name}
-                        </td>
-                        <td style={{ padding: "10px 8px" }}>{p.total}</td>
-                        <td style={{ padding: "10px 8px" }}>
+                        <td style={{ fontWeight: 500 }}>{p.name}</td>
+                        <td style={{ color: T.t2 }}>{p.total}</td>
+                        <td>
                           <div
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              gap: 6,
+                              gap: 8,
                             }}
                           >
                             <div className="progress">
@@ -1043,20 +1472,28 @@ export default function App() {
                                   width: pct * 100 + "%",
                                   background:
                                     pct < 0.15
-                                      ? "#dc3545"
+                                      ? T.accent
                                       : pct < 0.35
-                                        ? "#fd7e14"
-                                        : "#198754",
+                                        ? T.amber
+                                        : T.green,
                                 }}
                               />
                             </div>
-                            {avail}
+                            <span style={{ color: T.t2, fontSize: 12 }}>
+                              {avail}
+                            </span>
                           </div>
                         </td>
-                        <td style={{ padding: "10px 8px" }}>
+                        <td
+                          style={{
+                            color: T.t2,
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: 12,
+                          }}
+                        >
                           AWG {p.price.toFixed(2)}
                         </td>
-                        <td style={{ padding: "10px 8px" }}>
+                        <td>
                           <span
                             className={
                               "badge " +
@@ -1068,7 +1505,7 @@ export default function App() {
                             }
                           >
                             {pct < 0.15
-                              ? "Critico"
+                              ? "Crítico"
                               : pct < 0.35
                                 ? "Bajo"
                                 : "OK"}
@@ -1083,6 +1520,7 @@ export default function App() {
           </>
         )}
 
+        {/* ── NUEVA RESERVA ── */}
         {tab === "nueva-reserva" && (
           <div className="card">
             <div className="section-title">Nueva reserva</div>
@@ -1100,7 +1538,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <label>Telefono</label>
+                <label>Teléfono</label>
                 <input
                   value={form.phone}
                   onChange={function (e) {
@@ -1108,7 +1546,7 @@ export default function App() {
                       return Object.assign({}, f, { phone: e.target.value });
                     });
                   }}
-                  placeholder="+297 ..."
+                  placeholder="+297 …"
                 />
               </div>
             </div>
@@ -1122,11 +1560,11 @@ export default function App() {
                       return Object.assign({}, f, { event: e.target.value });
                     });
                   }}
-                  placeholder="Ej: Quinceanera Rodriguez"
+                  placeholder="Ej: Quinceañera Rodriguez"
                 />
               </div>
               <div>
-                <label>Lugar / Direccion</label>
+                <label>Lugar / Dirección</label>
                 <input
                   value={form.location}
                   onChange={function (e) {
@@ -1164,175 +1602,145 @@ export default function App() {
                 />
               </div>
             </div>
-            <div
-              style={{
-                marginTop: 14,
-                marginBottom: 6,
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-            >
-              Productos
-            </div>
-            {form.items.map(function (item, i) {
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr 1fr 1fr auto",
-                    gap: 6,
-                    marginBottom: 6,
-                    alignItems: "end",
-                  }}
-                >
-                  <div>
-                    {i === 0 && <label>Producto</label>}
-                    <select
-                      value={item.name}
-                      onChange={function (e) {
-                        updateFormItem(i, "name", e.target.value);
-                      }}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {products.map(function (p) {
-                        return (
-                          <option key={p.id} value={p.name}>
-                            {p.name}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                  <div>
-                    {i === 0 && <label>Cantidad</label>}
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.qty}
-                      onChange={function (e) {
-                        updateFormItem(i, "qty", e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    {i === 0 && <label>Precio AWG</label>}
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={item.price}
-                      onChange={function (e) {
-                        updateFormItem(i, "price", e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    {i === 0 && <label>Subtotal</label>}
-                    <input
-                      readOnly
-                      value={"AWG " + (item.qty * item.price).toFixed(2)}
-                      style={{ background: "#f8f9fa", color: "#6c757d" }}
-                    />
-                  </div>
-                  <div>
-                    {i === 0 && (
-                      <label style={{ visibility: "hidden" }}>x</label>
-                    )}
-                    <button
-                      className="btn btn-sm"
-                      style={{ color: "#dc3545", borderColor: "#dc3545" }}
-                      onClick={function () {
-                        removeFormItem(i);
-                      }}
-                    >
-                      x
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-            <button
-              className="btn btn-sm"
-              style={{ marginBottom: 10 }}
-              onClick={addFormItem}
-            >
-              + Agregar linea
-            </button>
-            <div
-              style={{
-                background: "#f8f9fa",
-                borderRadius: 8,
-                padding: "10px 14px",
-                marginBottom: 12,
-                fontSize: 13,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Subtotal</span>
-                <span style={{ fontWeight: 500 }}>
-                  AWG{" "}
-                  {form.items
-                    .reduce(function (s, i) {
-                      return s + i.qty * i.price;
-                    }, 0)
-                    .toFixed(2)}
-                </span>
+
+            <div style={{ marginTop: 18, marginBottom: 8 }}>
+              <div className="section-title" style={{ marginBottom: 10 }}>
+                Productos
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  color: "#6c757d",
-                  marginTop: 4,
-                }}
+              {form.items.map(function (item, i) {
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr 1fr 1fr auto",
+                      gap: 6,
+                      marginBottom: 6,
+                      alignItems: "end",
+                    }}
+                  >
+                    <div>
+                      {i === 0 && <label>Producto</label>}
+                      <select
+                        value={item.name}
+                        onChange={function (e) {
+                          updateFormItem(i, "name", e.target.value);
+                        }}
+                      >
+                        <option value="">Seleccionar…</option>
+                        {products.map(function (p) {
+                          return (
+                            <option key={p.id} value={p.name}>
+                              {p.name}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                    <div>
+                      {i === 0 && <label>Cantidad</label>}
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.qty}
+                        onChange={function (e) {
+                          updateFormItem(i, "qty", e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      {i === 0 && <label>Precio AWG</label>}
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={item.price}
+                        onChange={function (e) {
+                          updateFormItem(i, "price", e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      {i === 0 && <label>Subtotal</label>}
+                      <input
+                        readOnly
+                        value={"AWG " + (item.qty * item.price).toFixed(2)}
+                        style={{ background: T.bg0, color: T.t3 }}
+                      />
+                    </div>
+                    <div>
+                      {i === 0 && (
+                        <label style={{ visibility: "hidden" }}>·</label>
+                      )}
+                      <button
+                        className="btn btn-sm"
+                        style={{ color: T.accent, borderColor: T.accentBorder }}
+                        onClick={function () {
+                          removeFormItem(i);
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <button
+                className="btn btn-sm"
+                style={{ marginTop: 6, marginBottom: 14 }}
+                onClick={addFormItem}
               >
-                <span>BBO 1.5% (DIMP)</span>
-                <span>
-                  AWG{" "}
-                  {(
-                    form.items.reduce(function (s, i) {
-                      return s + i.qty * i.price;
-                    }, 0) * 0.015
-                  ).toFixed(2)}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontWeight: 600,
-                  marginTop: 6,
-                  paddingTop: 6,
-                  borderTop: "0.5px solid #dee2e6",
-                }}
-              >
-                <span>Total estimado</span>
-                <span>
-                  AWG{" "}
-                  {(
-                    form.items.reduce(function (s, i) {
-                      return s + i.qty * i.price;
-                    }, 0) * 1.015
-                  ).toFixed(2)}
-                </span>
-              </div>
+                + Agregar línea
+              </button>
             </div>
+
+            <div className="total-box">
+              {(function () {
+                var sub = form.items.reduce(function (s, i) {
+                  return s + i.qty * i.price;
+                }, 0);
+                var bbo = sub * 0.015;
+                return (
+                  <>
+                    <div className="total-row">
+                      <span>Subtotal</span>
+                      <span>AWG {sub.toFixed(2)}</span>
+                    </div>
+                    <div className="total-row">
+                      <span>BBO 1.5% (DIMP)</span>
+                      <span>AWG {bbo.toFixed(2)}</span>
+                    </div>
+                    <div className="total-row main">
+                      <span>Total estimado</span>
+                      <span>AWG {(sub * 1.015).toFixed(2)}</span>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+
             <div style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-primary" onClick={addReservation}>
                 Guardar reserva
               </button>
-              <button className="btn btn-accent" onClick={addReservation}>
+              <button
+                className="btn btn-accent"
+                onClick={function () {
+                  handleGeneratePDF(form);
+                  addReservation();
+                }}
+              >
                 Guardar y generar PDF
               </button>
             </div>
           </div>
         )}
 
+        {/* ── RESERVAS ── */}
         {tab === "reservas" && (
           <>
-            <div className="section-title">
-              Reservas ({reservations.length})
+            <div className="section-title" style={{ marginBottom: 12 }}>
+              <span>Reservas ({reservations.length})</span>
             </div>
             {reservations.map(function (r) {
               var total = resTotal(r);
@@ -1344,7 +1752,7 @@ export default function App() {
                       <div className="res-id">{r.id}</div>
                       <div className="res-client">{r.client}</div>
                       <div className="res-event">
-                        {r.event} - {r.location}
+                        {r.event} · {r.location}
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
@@ -1364,12 +1772,10 @@ export default function App() {
                             ? "Pendiente recogida"
                             : "Activa"}
                       </span>
-                      <div
-                        style={{ fontSize: 13, fontWeight: 600, marginTop: 6 }}
-                      >
+                      <div className="res-amount">
                         AWG {(total * 1.015).toFixed(2)}
                       </div>
-                      <div style={{ fontSize: 11, color: "#6c757d" }}>
+                      <div className="res-amount-sub">
                         incl. BBO AWG {bbo.toFixed(2)}
                       </div>
                     </div>
@@ -1381,8 +1787,8 @@ export default function App() {
                   <div className="res-items">
                     {r.items.map(function (it, i) {
                       return (
-                        <span key={i} style={{ marginRight: 10 }}>
-                          {it.qty}x {it.name}
+                        <span key={i} style={{ marginRight: 12 }}>
+                          {it.qty}× {it.name}
                         </span>
                       );
                     })}
@@ -1394,7 +1800,7 @@ export default function App() {
                         handleGeneratePDF(r);
                       }}
                     >
-                      Descargar factura PDF
+                      PDF
                     </button>
                     <button
                       className="btn btn-sm btn-wa"
@@ -1405,19 +1811,13 @@ export default function App() {
                       WhatsApp
                     </button>
                     <button
-                      className="btn btn-sm"
+                      className="btn btn-sm btn-twilio"
                       disabled={sendingWA}
-                      style={{
-                        background: "#0088cc",
-                        color: "#fff",
-                        borderColor: "#0088cc",
-                        opacity: sendingWA ? 0.7 : 1,
-                      }}
                       onClick={function () {
                         sendTwilioReminder(r);
                       }}
                     >
-                      {sendingWA ? "Enviando..." : "Twilio WA"}
+                      {sendingWA ? "Enviando…" : "Twilio WA"}
                     </button>
                     {r.status !== "recogido" && (
                       <button
@@ -1436,110 +1836,123 @@ export default function App() {
           </>
         )}
 
+        {/* ── ALERTAS ── */}
         {tab === "alertas" && (
           <>
             <div className="section-title">Alertas de recogida</div>
-            {pickupAlerts.length === 0 && (
-              <div className="empty" style={{ marginBottom: 16 }}>
-                No hay recogidas urgentes
-              </div>
-            )}
-            {pickupAlerts.map(function (r) {
-              return (
-                <div key={r.id} className={"alert-item " + alertLevel(r)}>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <div className="alert-title">
-                      {r.client} - {r.event}
-                    </div>
-                    <span className={"badge badge-" + alertLevel(r)}>
-                      {isToday(r.pickup) ? "HOY" : "Manana"}
-                    </span>
-                  </div>
-                  <div className="alert-sub">{r.location}</div>
-                  <div className="alert-sub" style={{ marginTop: 2 }}>
-                    {r.items
-                      .map(function (i) {
-                        return i.qty + "x " + i.name;
-                      })
-                      .join(" - ")}
-                  </div>
-                  <div className="row-actions">
-                    <button
-                      className="btn btn-sm"
-                      style={{
-                        background: "#6366f1",
-                        color: "#fff",
-                        borderColor: "#6366f1",
-                      }}
-                      onClick={function () {
-                        setSelectedAlert(r);
-                      }}
-                    >
-                      Ver
-                    </button>
-                    <button
-                      className="btn btn-sm btn-wa"
-                      onClick={function () {
-                        openWhatsApp(r.phone, buildWAMsg(r));
-                      }}
-                    >
-                      WhatsApp Web
-                    </button>
-                    <button
-                      className="btn btn-sm"
-                      disabled={sendingWA}
-                      style={{
-                        background: "#0088cc",
-                        color: "#fff",
-                        borderColor: "#0088cc",
-                        opacity: sendingWA ? 0.7 : 1,
-                      }}
-                      onClick={function () {
-                        sendTwilioReminder(r);
-                      }}
-                    >
-                      {sendingWA ? "Enviando..." : "Twilio WA"}
-                    </button>
-                    <button
-                      className="btn btn-sm btn-accent"
-                      onClick={function () {
-                        handleGeneratePDF(r);
-                      }}
-                    >
-                      Factura PDF
-                    </button>
-                    <button
-                      className="btn btn-sm"
-                      onClick={function () {
-                        markPickedUp(r.id);
-                      }}
-                    >
-                      Marcar recogido
-                    </button>
-                  </div>
+            {pickupAlerts.length === 0 ? (
+              <div className="card">
+                <div className="empty">
+                  <div className="empty-icon">✓</div>
+                  <div className="empty-label">Sin recogidas urgentes</div>
+                  <div className="empty-sub">Todo está al día</div>
                 </div>
-              );
-            })}
-            <div className="section-title" style={{ marginTop: 16 }}>
+              </div>
+            ) : (
+              pickupAlerts.map(function (r) {
+                return (
+                  <div key={r.id} className={"alert-item " + alertLevel(r)}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <div className="alert-title">
+                        {r.client} — {r.event}
+                      </div>
+                      <span className={"badge badge-" + alertLevel(r)}>
+                        {isToday(r.pickup) ? "HOY" : "Mañana"}
+                      </span>
+                    </div>
+                    <div className="alert-sub">{r.location}</div>
+                    <div className="alert-sub" style={{ marginTop: 2 }}>
+                      {r.items
+                        .map(function (i) {
+                          return i.qty + "× " + i.name;
+                        })
+                        .join(" · ")}
+                    </div>
+                    <div className="row-actions">
+                      <button
+                        className="btn btn-sm"
+                        style={{
+                          background: "rgba(99,102,241,0.12)",
+                          color: "#a5b4fc",
+                          borderColor: "rgba(99,102,241,0.35)",
+                        }}
+                        onClick={function () {
+                          setSelectedAlert(r);
+                        }}
+                      >
+                        Ver detalle
+                      </button>
+                      <button
+                        className="btn btn-sm btn-wa"
+                        onClick={function () {
+                          openWhatsApp(r.phone, buildWAMsg(r));
+                        }}
+                      >
+                        WhatsApp
+                      </button>
+                      <button
+                        className="btn btn-sm btn-twilio"
+                        disabled={sendingWA}
+                        onClick={function () {
+                          sendTwilioReminder(r);
+                        }}
+                      >
+                        {sendingWA ? "Enviando…" : "Twilio WA"}
+                      </button>
+                      <button
+                        className="btn btn-sm btn-accent"
+                        onClick={function () {
+                          handleGeneratePDF(r);
+                        }}
+                      >
+                        PDF
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        onClick={function () {
+                          markPickedUp(r.id);
+                        }}
+                      >
+                        Marcar recogido
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            <div className="section-title" style={{ marginTop: 20 }}>
               Alertas de inventario
             </div>
-            {lowStock.length === 0 && (
-              <div className="empty">Inventario en buen estado</div>
-            )}
-            {lowStock.map(function (p) {
-              var avail = p.total - p.rented;
-              return (
-                <div key={p.id} className="alert-item warning">
-                  <div className="alert-title">Stock bajo - {p.name}</div>
-                  <div className="alert-sub">
-                    Disponible: {avail} de {p.total} unidades (
-                    {Math.round((avail / p.total) * 100)}%)
-                  </div>
+            {lowStock.length === 0 ? (
+              <div className="card">
+                <div className="empty">
+                  <div className="empty-icon">✓</div>
+                  <div className="empty-label">Inventario en buen estado</div>
                 </div>
-              );
-            })}
+              </div>
+            ) : (
+              lowStock.map(function (p) {
+                var avail = p.total - p.rented;
+                return (
+                  <div key={p.id} className="alert-item warning">
+                    <div className="alert-title">Stock bajo · {p.name}</div>
+                    <div className="alert-sub">
+                      Disponible: {avail} de {p.total} unidades (
+                      {Math.round((avail / p.total) * 100)}%)
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {/* MODAL */}
             {selectedAlert && (
               <div
                 className="modal-overlay"
@@ -1554,50 +1967,41 @@ export default function App() {
                   }}
                 >
                   <div className="modal-header">
-                    <h2>Detalle de Recogida</h2>
+                    <h2>Detalle de recogida</h2>
                     <button
                       className="modal-close"
                       onClick={function () {
                         setSelectedAlert(null);
                       }}
                     >
-                      x
+                      ✕
                     </button>
                   </div>
                   <div className="modal-body">
                     <div className="modal-section">
                       <div className="modal-section-title">Cliente</div>
-                      <div style={{ fontSize: 16, fontWeight: 600 }}>
+                      <div
+                        style={{ fontSize: 16, fontWeight: 600, color: T.t1 }}
+                      >
                         {selectedAlert.client}
                       </div>
                     </div>
                     <div className="modal-section">
-                      <div className="modal-section-title">Informacion</div>
+                      <div className="modal-section-title">Información</div>
                       <div className="modal-info">
-                        <div className="modal-info-item">
-                          <div className="modal-info-label">Evento</div>
-                          <div className="modal-info-value">
-                            {selectedAlert.event}
-                          </div>
-                        </div>
-                        <div className="modal-info-item">
-                          <div className="modal-info-label">Telefono</div>
-                          <div className="modal-info-value">
-                            {selectedAlert.phone}
-                          </div>
-                        </div>
-                        <div className="modal-info-item">
-                          <div className="modal-info-label">Ubicacion</div>
-                          <div className="modal-info-value">
-                            {selectedAlert.location}
-                          </div>
-                        </div>
-                        <div className="modal-info-item">
-                          <div className="modal-info-label">Fecha Recogida</div>
-                          <div className="modal-info-value">
-                            {selectedAlert.pickup}
-                          </div>
-                        </div>
+                        {[
+                          ["Evento", selectedAlert.event],
+                          ["Teléfono", selectedAlert.phone],
+                          ["Ubicación", selectedAlert.location],
+                          ["Fecha recogida", formatDate(selectedAlert.pickup)],
+                        ].map(function ([label, val]) {
+                          return (
+                            <div key={label} className="modal-info-item">
+                              <div className="modal-info-label">{label}</div>
+                              <div className="modal-info-value">{val}</div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <div className="modal-section">
@@ -1605,7 +2009,7 @@ export default function App() {
                       <div className="modal-products">
                         <div className="modal-product-header">
                           <span>Producto</span>
-                          <span style={{ textAlign: "center" }}>Cantidad</span>
+                          <span style={{ textAlign: "center" }}>Cant.</span>
                           <span style={{ textAlign: "right" }}>Precio</span>
                         </div>
                         {selectedAlert.items.map(function (item, idx) {
@@ -1615,17 +2019,11 @@ export default function App() {
                           return (
                             <div key={idx} className="modal-product-row">
                               <span>{item.name}</span>
-                              <span
-                                className="modal-product-qty"
-                                style={{ textAlign: "center" }}
-                              >
+                              <span className="modal-product-qty">
                                 {item.qty}
                               </span>
-                              <span
-                                className="modal-product-price"
-                                style={{ textAlign: "right" }}
-                              >
-                                $
+                              <span className="modal-product-price">
+                                AWG{" "}
                                 {(
                                   item.price || (prod ? prod.price : 0)
                                 ).toFixed(2)}
@@ -1637,13 +2035,13 @@ export default function App() {
                       <div className="modal-total">
                         <span className="modal-total-label">Total</span>
                         <span className="modal-total-value">
-                          ${resTotal(selectedAlert).toFixed(2)}
+                          AWG {resTotal(selectedAlert).toFixed(2)}
                         </span>
                       </div>
                     </div>
                     <div
                       className="row-actions"
-                      style={{ marginTop: 16, justifyContent: "center" }}
+                      style={{ justifyContent: "center", marginTop: 4 }}
                     >
                       <button
                         className="btn btn-sm btn-wa"
@@ -1657,12 +2055,7 @@ export default function App() {
                         WhatsApp
                       </button>
                       <button
-                        className="btn btn-sm"
-                        style={{
-                          background: "#0088cc",
-                          color: "#fff",
-                          borderColor: "#0088cc",
-                        }}
+                        className="btn btn-sm btn-twilio"
                         onClick={function () {
                           sendTwilioReminder(selectedAlert);
                         }}
@@ -1675,7 +2068,7 @@ export default function App() {
                           handleGeneratePDF(selectedAlert);
                         }}
                       >
-                        Factura PDF
+                        PDF
                       </button>
                       <button
                         className="btn btn-sm"
