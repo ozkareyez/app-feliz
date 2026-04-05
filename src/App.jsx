@@ -185,7 +185,7 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   doc.setFillColor(248, 249, 250);
   doc.rect(0, 62, W, 4, "F");
   try {
-    doc.addImage(window.location.origin + "/fr.jpg", "JPEG", M, 6, 32, 32);
+    doc.addImage(window.location.origin + "/fr.png", "JPEG", M, 6, 32, 32);
   } catch (e) {}
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
@@ -1212,7 +1212,7 @@ export default function App() {
         {/* TOP BAR */}
         <div className="topbar">
           <div className="topbar-left">
-            <img src="/fr.jpg" alt="Feliz RentEnterprise" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+            <img src="/fr.png" alt="Feliz RentEnterprise" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
             <div>
               <div className="topbar-title">Feliz RentEnterprise</div>
               <div className="topbar-sub">
