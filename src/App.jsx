@@ -935,9 +935,6 @@ export default function App() {
   var todayDeliveries = reservations.filter(function (r) {
     return isToday(r.delivery) && r.status !== "recogido";
   }).length;
-  var monthRevenue = reservations.reduce(function (s, r) {
-    return s + resTotal(r);
-  }, 0);
 
   useEffect(function () {
     if (pickupAlerts.length > 0 || deliveryAlerts.length > 0) {
