@@ -935,7 +935,7 @@ export default function App() {
     if (pickupAlerts.length > 0) {
       setShowWelcome(true);
     }
-  }, []);
+  }, [pickupAlerts.length]);
 
   var todayAlerts = pickupAlerts.filter(function (r) { return isToday(r.pickup); });
   var tomorrowAlerts = pickupAlerts.filter(function (r) { return isTomorrow(r.pickup); });
