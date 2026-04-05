@@ -872,6 +872,7 @@ export default function App() {
   var [products, setProducts] = useState(initProducts);
   var [reservations, setReservations] = useState(initReservations);
   var [notification, setNotification] = useState(null);
+  var [showWelcome, setShowWelcome] = useState(false);
   var [invoiceCounter, setInvoiceCounter] = useState(initCounter);
   var [sendingWA, setSendingWA] = useState(false);
   var [selectedAlert, setSelectedAlert] = useState(null);
@@ -929,6 +930,15 @@ export default function App() {
   var monthRevenue = reservations.reduce(function (s, r) {
     return s + resTotal(r);
   }, 0);
+
+  useEffect(function () {
+    if (pickupAlerts.length > 0) {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  var todayAlerts = pickupAlerts.filter(function (r) { return isToday(r.pickup); });
+  var tomorrowAlerts = pickupAlerts.filter(function (r) { return isTomorrow(r.pickup); });
 
   useEffect(
     function () {
@@ -1116,6 +1126,87 @@ export default function App() {
     <>
       <style>{css}</style>
       {notification && <div className="notification">{notification}</div>}
+
+      {showWelcome && (
+        <div className="modal-overlay" onClick={function () { setShowWelcome(false); }}>
+          <div className="modal-content" onClick={function (e) { e.stopPropagation(); }} style={{ maxWidth: 520 }}>
+            <div className="modal-header">
+              <h2 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 20 }}>👋</span>
+                Bienvenido a Feliz RentEnterprise
+              </h2>
+              <button className="modal-close" onClick={function () { setShowWelcome(false); }}>✕</button>
+            </div>
+            <div className="modal-body">
+              {pickupAlerts.length > 0 ? (
+                <>
+                  <div style={{ marginBottom: 16, color: T.t2, fontSize: 13 }}>
+                    Tienes <strong style={{ color: T.accent }}>{pickupAlerts.length}</strong> recogida{pickupAlerts.length !== 1 ? "s" : ""} pendiente{pickupAlerts.length !== 1 ? "s" : ""} en los próximos días.
+                  </div>
+
+                  {todayAlerts.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <span className="badge badge-danger">HOY</span>
+                        <span style={{ color: T.t2, fontSize: 12 }}>{todayAlerts.length} recogida{todayAlerts.length !== 1 ? "s" : ""}</span>
+                      </div>
+                      {todayAlerts.map(function (r) {
+                        return (
+                          <div key={r.id} style={{ background: T.bg3, borderRadius: 8, padding: "10px 12px", marginBottom: 6, borderLeft: "3px solid " + T.accent }}>
+                            <div style={{ fontWeight: 600, color: T.t1, marginBottom: 3 }}>{r.client}</div>
+                            <div style={{ fontSize: 12, color: T.t2 }}>{r.event} · {r.location}</div>
+                            <div style={{ fontSize: 11, color: T.t3, marginTop: 4 }}>
+                              {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {tomorrowAlerts.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <span className="badge badge-warning">MAÑANA</span>
+                        <span style={{ color: T.t2, fontSize: 12 }}>{tomorrowAlerts.length} recogida{tomorrowAlerts.length !== 1 ? "s" : ""}</span>
+                      </div>
+                      {tomorrowAlerts.map(function (r) {
+                        return (
+                          <div key={r.id} style={{ background: T.bg3, borderRadius: 8, padding: "10px 12px", marginBottom: 6, borderLeft: "3px solid " + T.amber }}>
+                            <div style={{ fontWeight: 600, color: T.t1, marginBottom: 3 }}>{r.client}</div>
+                            <div style={{ fontSize: 12, color: T.t2 }}>{r.event} · {r.location}</div>
+                            <div style={{ fontSize: 11, color: T.t3, marginTop: 4 }}>
+                              {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                    <button className="btn btn-primary" onClick={function () { setShowWelcome(false); setTab("alertas"); }} style={{ flex: 1 }}>
+                      Ver alertas
+                    </button>
+                    <button className="btn" onClick={function () { setShowWelcome(false); }} style={{ flex: 1 }}>
+                      Cerrar
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>✓</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: T.t1, marginBottom: 6 }}>¡Todo al día!</div>
+                  <div style={{ color: T.t2, fontSize: 13 }}>No hay recogidas pendientes.</div>
+                  <button className="btn btn-primary" onClick={function () { setShowWelcome(false); }} style={{ marginTop: 16 }}>
+                    Continuar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="app">
         {/* TOP BAR */}
