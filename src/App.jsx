@@ -174,48 +174,43 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   if (!deposit) deposit = 0;
   if (!notes) notes = "";
   var doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  var W = 210,
-    M = 18,
-    CW = W - M * 2;
+  var W = 210, M = 18, CW = W - M * 2;
   var y = 0;
   doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, 46, 42, "F");
+  doc.rect(0, 0, W, 58, "F");
   doc.setFillColor(26, 26, 46);
-  doc.rect(46, 0, W - 46, 42, "F");
+  doc.rect(0, 58, W, 2, "F");
   doc.setFillColor(233, 69, 96);
-  doc.rect(0, 42, W, 2, "F");
+  doc.rect(0, 60, W, 2, "F");
+  doc.setFillColor(248, 249, 250);
+  doc.rect(0, 62, W, 4, "F");
   try {
-    doc.addImage(window.location.origin + "/fr.jpg", "JPEG", M - 1, 7, 28, 28);
+    doc.addImage(window.location.origin + "/fr.jpg", "JPEG", M, 6, 32, 32);
   } catch (e) {}
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(255, 255, 255);
-  doc.text(COMPANY.name, M + 32, 14);
+  doc.setFontSize(14);
+  doc.setTextColor(26, 26, 46);
+  doc.text(COMPANY.name, M + 36, 14);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.setTextColor(180, 180, 200);
-  doc.text(COMPANY.address, M + 32, 20);
-  doc.text("Tel: " + COMPANY.phone + "  |  " + COMPANY.email, M + 32, 25);
-  doc.text("COR / Tax ID: " + COMPANY.taxId, M + 32, 30);
+  doc.setTextColor(80, 80, 80);
+  doc.text(COMPANY.address, M + 36, 20);
+  doc.text("Tel: " + COMPANY.phone + "  |  " + COMPANY.email, M + 36, 25);
+  doc.text("COR / Tax ID: " + COMPANY.taxId, M + 36, 30);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
+  doc.setFontSize(24);
   doc.setTextColor(233, 69, 96);
   doc.text("FACTURA", W - M, 16, { align: "right" });
-  doc.setFontSize(12);
-  doc.setTextColor(255, 255, 255);
-  doc.text(invoiceNum, W - M, 24, { align: "right" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(170, 170, 190);
-  var td = new Date().toLocaleDateString("es-AW", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  doc.setFontSize(10);
+  doc.setTextColor(80, 80, 80);
+  doc.text(invoiceNum, W - M, 24, { align: "right" });
+  var td = new Date().toLocaleDateString("es-AW", { day: "2-digit", month: "long", year: "numeric" });
+  doc.setFontSize(9);
   doc.text("Fecha: " + td, W - M, 31, { align: "right" });
-  doc.text("Reserva: " + reservation.id, W - M, 36, { align: "right" });
-  y = 50;
-  var boxH = 34;
+  doc.text("Reserva: " + reservation.id, W - M, 37, { align: "right" });
+  y = 74;
+  var boxH = 38;
   doc.setFillColor(248, 249, 250);
   doc.roundedRect(M, y, CW / 2 - 3, boxH, 2, 2, "F");
   doc.setDrawColor(222, 226, 230);
@@ -223,50 +218,39 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   doc.roundedRect(M, y, CW / 2 - 3, boxH, 2, 2, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.setTextColor(108, 117, 125);
-  doc.text("CLIENTE", M + 4, y + 6);
+  doc.setTextColor(233, 69, 96);
+  doc.text("CLIENTE", M + 4, y + 7);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(33, 37, 41);
-  doc.text(reservation.client, M + 4, y + 13);
+  doc.setFontSize(10);
+  doc.setTextColor(26, 26, 46);
+  doc.text(reservation.client, M + 4, y + 14);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(80, 80, 80);
-  doc.text("Tel: " + reservation.phone, M + 4, y + 19);
-  doc.text("Evento: " + reservation.event, M + 4, y + 25);
-  doc.text("Lugar: " + reservation.location, M + 4, y + 31);
+  doc.text("Tel: " + reservation.phone, M + 4, y + 21);
+  doc.text("Evento: " + reservation.event, M + 4, y + 28);
+  doc.text("Lugar: " + reservation.location, M + 4, y + 35);
   var ex = M + CW / 2 + 3;
   doc.setFillColor(248, 249, 250);
   doc.roundedRect(ex, y, CW / 2 - 3, boxH, 2, 2, "F");
   doc.roundedRect(ex, y, CW / 2 - 3, boxH, 2, 2, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.setTextColor(108, 117, 125);
-  doc.text("DETALLES DEL EVENTO", ex + 4, y + 6);
+  doc.setTextColor(233, 69, 96);
+  doc.text("DETALLES DEL EVENTO", ex + 4, y + 7);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(80, 80, 80);
-  doc.text("Entrega: " + formatDate(reservation.delivery), ex + 4, y + 13);
-  doc.text("Recogida: " + formatDate(reservation.pickup), ex + 4, y + 19);
-  doc.text(
-    "Dias: " + (daysBetween(reservation.delivery, reservation.pickup) || 1),
-    ex + 4,
-    y + 25,
-  );
-  y += boxH + 8;
+  doc.setFontSize(9);
+  doc.setTextColor(26, 26, 46);
+  doc.text("Entrega: " + formatDate(reservation.delivery), ex + 4, y + 16);
+  doc.text("Recogida: " + formatDate(reservation.pickup), ex + 4, y + 24);
+  doc.text("Dias: " + (daysBetween(reservation.delivery, reservation.pickup) || 1), ex + 4, y + 32);
+  y += boxH + 10;
   var subtotal = 0;
   var tableRows = reservation.items.map(function (item) {
-    var days =
-      daysBetween(reservation.delivery, reservation.pickup) || item.days || 1;
+    var days = daysBetween(reservation.delivery, reservation.pickup) || item.days || 1;
     var tot = item.qty * days * item.price;
     subtotal += tot;
-    return [
-      item.name,
-      item.qty.toString(),
-      days.toString(),
-      "AWG " + item.price.toFixed(2),
-      "AWG " + tot.toFixed(2),
-    ];
+    return [item.name, item.qty.toString(), days.toString(), "AWG " + item.price.toFixed(2), "AWG " + tot.toFixed(2)];
   });
   autoTable(doc, {
     startY: y,
@@ -274,88 +258,74 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
     body: tableRows,
     margin: { left: M, right: M },
     theme: "grid",
-    headStyles: {
-      fillColor: [15, 52, 96],
-      textColor: 255,
-      fontStyle: "bold",
-      fontSize: 8,
-      halign: "center",
-    },
-    columnStyles: {
-      0: { cellWidth: CW * 0.38, halign: "left" },
-      1: { cellWidth: CW * 0.1, halign: "center" },
-      2: { cellWidth: CW * 0.1, halign: "center" },
-      3: { cellWidth: CW * 0.22, halign: "right" },
-      4: { cellWidth: CW * 0.2, halign: "right" },
-    },
-    bodyStyles: { fontSize: 8.5, textColor: [33, 37, 41] },
+    headStyles: { fillColor: [26, 26, 46], textColor: 255, fontStyle: "bold", fontSize: 8, halign: "center" },
+    columnStyles: { 0: { cellWidth: CW * 0.38, halign: "left" }, 1: { cellWidth: CW * 0.1, halign: "center" }, 2: { cellWidth: CW * 0.1, halign: "center" }, 3: { cellWidth: CW * 0.22, halign: "right" }, 4: { cellWidth: CW * 0.2, halign: "right" } },
+    bodyStyles: { fontSize: 9, textColor: [33, 37, 41] },
     alternateRowStyles: { fillColor: [248, 249, 250] },
     styles: { lineColor: [222, 226, 230], lineWidth: 0.3 },
   });
-  y = doc.lastAutoTable.finalY + 4;
+  y = doc.lastAutoTable.finalY + 6;
   var bboAmt = subtotal * 0.015;
   var totalDue = subtotal + bboAmt - deposit;
-  function drawRow(label, value, hi) {
-    if (hi) {
-      doc.setFillColor(26, 26, 46);
-      doc.rect(M, y, CW, 10, "F");
-      doc.setDrawColor(233, 69, 96);
-      doc.setLineWidth(0.8);
-      doc.line(M, y, M + CW, y);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(10);
-      doc.setTextColor(255, 255, 255);
-    } else {
-      doc.setFillColor(248, 249, 250);
-      doc.rect(M, y, CW, 8, "F");
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
-      doc.setTextColor(80, 80, 80);
-    }
-    doc.text(label, M + CW * 0.6 + 4, y + (hi ? 7 : 5.5));
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(hi ? 255 : 33, hi ? 255 : 37, hi ? 255 : 41);
-    doc.text(value, M + CW - 2, y + (hi ? 7 : 5.5), { align: "right" });
-    y += hi ? 10 : 8;
-  }
-  drawRow("Subtotal", "AWG " + subtotal.toFixed(2), false);
-  drawRow(
-    "BBO (1.5%) - Belasting op Bedrijfsomzetten",
-    "AWG " + bboAmt.toFixed(2),
-    false,
-  );
-  if (deposit > 0)
-    drawRow("Deposito pagado", "- AWG " + deposit.toFixed(2), false);
-  drawRow("TOTAL A PAGAR", "AWG " + totalDue.toFixed(2), true);
-  y += 6;
   doc.setFillColor(248, 249, 250);
-  doc.rect(M, y, CW, 18, "F");
+  doc.rect(M, y, CW, 8, "F");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
+  doc.text("Subtotal", M + 4, y + 5.5);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(26, 26, 46);
+  doc.text("AWG " + subtotal.toFixed(2), M + CW - 2, y + 5.5, { align: "right" });
+  y += 8;
+  doc.setFillColor(248, 249, 250);
+  doc.rect(M, y, CW, 8, "F");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(80, 80, 80);
+  doc.text("BBO (1.5%) - Belasting op Bedrijfsomzetten", M + 4, y + 5.5);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(26, 26, 46);
+  doc.text("AWG " + bboAmt.toFixed(2), M + CW - 2, y + 5.5, { align: "right" });
+  y += 10;
+  if (deposit > 0) {
+    doc.setFillColor(248, 249, 250);
+    doc.rect(M, y, CW, 8, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
+    doc.text("Deposito pagado", M + 4, y + 5.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(26, 26, 46);
+    doc.text("- AWG " + deposit.toFixed(2), M + CW - 2, y + 5.5, { align: "right" });
+    y += 10;
+  }
+  doc.setFillColor(233, 69, 96);
+  doc.rect(M, y, CW, 1, "F");
+  y += 1;
+  doc.setFillColor(26, 26, 46);
+  doc.rect(M, y, CW, 12, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text("TOTAL A PAGAR", M + 4, y + 8);
+  doc.setFontSize(13);
+  doc.text("AWG " + totalDue.toFixed(2), M + CW - 2, y + 8, { align: "right" });
+  y += 16;
+  doc.setFillColor(248, 249, 250);
+  doc.roundedRect(M, y, CW, 22, 3, 3, "F");
   doc.setDrawColor(222, 226, 230);
   doc.setLineWidth(0.3);
-  doc.rect(M, y, CW, 18, "S");
+  doc.roundedRect(M, y, CW, 22, 3, 3, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.setTextColor(108, 117, 125);
-  doc.text("INFORMACION DE PAGO", M + 4, y + 6);
+  doc.setTextColor(233, 69, 96);
+  doc.text("INFORMACION DE PAGO", M + 4, y + 7);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(50, 50, 50);
-  doc.text(
-    "Banco: " +
-      COMPANY.bank +
-      "  |  Cuenta: " +
-      COMPANY.account +
-      "  |  A nombre de: " +
-      COMPANY.name,
-    M + 4,
-    y + 12,
-  );
-  doc.text(
-    "Metodos: Efectivo - Transferencia bancaria - Tarjeta",
-    M + 4,
-    y + 17,
-  );
-  y += 22;
+  doc.text("Banco: " + COMPANY.bank + "  |  Cuenta: " + COMPANY.account + "  |  A nombre de: " + COMPANY.name, M + 4, y + 13);
+  doc.text("Metodos: Efectivo - Transferencia bancaria - Tarjeta", M + 4, y + 19);
+  y += 28;
   if (notes) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
@@ -368,26 +338,13 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
   var pH = 297;
   doc.setDrawColor(222, 226, 230);
   doc.setLineWidth(0.3);
-  doc.line(M, pH - 20, W - M, pH - 20);
+  doc.line(M, pH - 22, W - M, pH - 22);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(108, 117, 125);
-  doc.text(
-    "Factura generada conforme a la regulacion fiscal de Aruba - DIMP (Departamento Impuesto y Aduana)",
-    W / 2,
-    pH - 14,
-    { align: "center" },
-  );
+  doc.text("Factura generada conforme a la regulacion fiscal de Aruba - DIMP (Departamento Impuesto y Aduana)", W / 2, pH - 15, { align: "center" });
   doc.setFont("helvetica", "normal");
-  doc.text(
-    "BBO registrado bajo la Landsverordening Belasting op Bedrijfsomzetten | " +
-      COMPANY.name +
-      " (c) " +
-      new Date().getFullYear(),
-    W / 2,
-    pH - 9,
-    { align: "center" },
-  );
+  doc.text("BBO registrado bajo la Landsverordening Belasting op Bedrijfsomzetten | " + COMPANY.name + " (c) " + new Date().getFullYear(), W / 2, pH - 9, { align: "center" });
   doc.save(invoiceNum + "_" + reservation.client.replace(/\s/g, "_") + ".pdf");
 }
 
