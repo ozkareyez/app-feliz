@@ -1,22 +1,30 @@
 <!doctype html>
 <html lang="es">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/logofeliz.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#e94560" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0b0f1a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- iOS PWA (Safari no lee el manifest para algunos meta) -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
-      name="description"
-      content="Feliz Enterprise - Sistema de gestión empresarial"
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logofeliz.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Feliz Enterprise</title>
+    <meta name="apple-mobile-web-app-title" content="Feliz" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpg" sizes="192x192" href="/icons/fr.jpg" />
+
+    <title>Feliz Renterprise</title>
   </head>
   <body>
-    <noscript
-      >Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript
-    >
     <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
