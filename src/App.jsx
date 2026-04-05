@@ -101,7 +101,7 @@ const INIT_RESERVATIONS = [
 ];
 
 const COMPANY = {
-  name: "Feliz Enterprise",
+  name: "Feliz RentEnterprise",
   address: "Pos chiquito 22B",
   phone: "+297 375 7020",
   email: "felizenterprise@gmail.com",
@@ -155,7 +155,7 @@ function buildWAMsg(r) {
     lines +
     "\n\nLugar: " +
     r.location +
-    ".\nFeliz Enterprise."
+    ".\nFeliz RentEnterprise."
   );
 }
 function buildWAInvoice(r, total) {
@@ -166,7 +166,7 @@ function buildWAInvoice(r, total) {
     r.event +
     ". Total: AWG " +
     (total * 1.015).toFixed(2) +
-    " (BBO 1.5%). Feliz Enterprise."
+    " (BBO 1.5%). Feliz RentEnterprise."
   );
 }
 
@@ -178,20 +178,25 @@ function generateInvoicePDF(reservation, invoiceNum, deposit, notes) {
     M = 18,
     CW = W - M * 2;
   var y = 0;
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 46, 42, "F");
   doc.setFillColor(26, 26, 46);
-  doc.rect(0, 0, W, 42, "F");
+  doc.rect(46, 0, W - 46, 42, "F");
   doc.setFillColor(233, 69, 96);
   doc.rect(0, 42, W, 2, "F");
+  try {
+    doc.addImage(window.location.origin + "/fr.jpg", "JPEG", M - 1, 7, 28, 28);
+  } catch (e) {}
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   doc.setTextColor(255, 255, 255);
-  doc.text(COMPANY.name, M, 14);
+  doc.text(COMPANY.name, M + 32, 14);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(180, 180, 200);
-  doc.text(COMPANY.address, M, 20);
-  doc.text("Tel: " + COMPANY.phone + "  |  " + COMPANY.email, M, 25);
-  doc.text("COR / Tax ID: " + COMPANY.taxId, M, 30);
+  doc.text(COMPANY.address, M + 32, 20);
+  doc.text("Tel: " + COMPANY.phone + "  |  " + COMPANY.email, M + 32, 25);
+  doc.text("COR / Tax ID: " + COMPANY.taxId, M + 32, 30);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(233, 69, 96);
@@ -1159,9 +1164,9 @@ export default function App() {
         {/* TOP BAR */}
         <div className="topbar">
           <div className="topbar-left">
-            <div className="accent-dot" />
+            <img src="/fr.jpg" alt="Feliz RentEnterprise" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
             <div>
-              <div className="topbar-title">Feliz Enterprise</div>
+              <div className="topbar-title">Feliz RentEnterprise</div>
               <div className="topbar-sub">
                 Inventario y facturación · DIMP Aruba
               </div>
