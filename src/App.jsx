@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { usePushNotifications } from "./usePushNotifications";
 
 const INIT_PRODUCTS = [
   {
@@ -928,6 +929,8 @@ export default function App() {
     unit: "unidad",
   });
 
+  var { testNotification } = usePushNotifications(reservations);
+
   useEffect(
     function () {
       localStorage.setItem("aruba_products", JSON.stringify(products));
@@ -1177,6 +1180,24 @@ export default function App() {
                 ? "✓ Sin alertas"
                 : `● ${totalAlerts} alerta${totalAlerts !== 1 ? "s" : ""}`}
             </div>
+            {import.meta.env.DEV && (
+              <button
+                onClick={testNotification}
+                style={{
+                  marginTop: 4,
+                  fontSize: 10,
+                  padding: "2px 6px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 5,
+                  color: "#8892a4",
+                  cursor: "pointer",
+                  display: "block",
+                }}
+              >
+                Test notif
+              </button>
+            )}
           </div>
         </div>
 
