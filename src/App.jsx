@@ -918,6 +918,11 @@ export default function App() {
       r.status !== "recogido" && (isToday(r.pickup) || isTomorrow(r.pickup))
     );
   });
+  var deliveryAlerts = reservations.filter(function (r) {
+    return (
+      r.status !== "recogido" && (isToday(r.delivery) || isTomorrow(r.delivery))
+    );
+  });
   var lowStock = products.filter(function (p) {
     return (p.total - p.rented) / p.total < 0.25;
   });
@@ -927,18 +932,23 @@ export default function App() {
   var todayPickups = reservations.filter(function (r) {
     return isToday(r.pickup) && r.status !== "recogido";
   }).length;
+  var todayDeliveries = reservations.filter(function (r) {
+    return isToday(r.delivery) && r.status !== "recogido";
+  }).length;
   var monthRevenue = reservations.reduce(function (s, r) {
     return s + resTotal(r);
   }, 0);
 
   useEffect(function () {
-    if (pickupAlerts.length > 0) {
+    if (pickupAlerts.length > 0 || deliveryAlerts.length > 0) {
       setShowWelcome(true);
     }
-  }, [pickupAlerts.length]);
+  }, [pickupAlerts.length, deliveryAlerts.length]);
 
-  var todayAlerts = pickupAlerts.filter(function (r) { return isToday(r.pickup); });
-  var tomorrowAlerts = pickupAlerts.filter(function (r) { return isTomorrow(r.pickup); });
+  var todayPickupAlerts = pickupAlerts.filter(function (r) { return isToday(r.pickup); });
+  var tomorrowPickupAlerts = pickupAlerts.filter(function (r) { return isTomorrow(r.pickup); });
+  var todayDeliveryAlerts = deliveryAlerts.filter(function (r) { return isToday(r.delivery); });
+  var tomorrowDeliveryAlerts = deliveryAlerts.filter(function (r) { return isTomorrow(r.delivery); });
 
   useEffect(
     function () {
@@ -990,6 +1000,15 @@ export default function App() {
       });
     });
     notify("Recogida marcada como completada");
+  }
+
+  function markDelivered(id) {
+    setReservations(function (prev) {
+      return prev.map(function (r) {
+        return r.id === id ? Object.assign({}, r, { status: "entregado" }) : r;
+      });
+    });
+    notify("Entrega marcada como completada");
   }
 
   function openWhatsApp(phone, msg) {
@@ -1120,7 +1139,7 @@ export default function App() {
     });
   }
 
-  var totalAlerts = pickupAlerts.length + lowStock.length;
+  var totalAlerts = pickupAlerts.length + deliveryAlerts.length + lowStock.length;
 
   return (
     <>
@@ -1138,19 +1157,39 @@ export default function App() {
               <button className="modal-close" onClick={function () { setShowWelcome(false); }}>✕</button>
             </div>
             <div className="modal-body">
-              {pickupAlerts.length > 0 ? (
+              {(pickupAlerts.length > 0 || deliveryAlerts.length > 0) ? (
                 <>
                   <div style={{ marginBottom: 16, color: T.t2, fontSize: 13 }}>
-                    Tienes <strong style={{ color: T.accent }}>{pickupAlerts.length}</strong> recogida{pickupAlerts.length !== 1 ? "s" : ""} pendiente{pickupAlerts.length !== 1 ? "s" : ""} en los próximos días.
+                    Tienes <strong style={{ color: T.accent }}>{pickupAlerts.length + deliveryAlerts.length}</strong> alerta{pickupAlerts.length + deliveryAlerts.length !== 1 ? "s" : ""} pendiente{pickupAlerts.length + deliveryAlerts.length !== 1 ? "s" : ""} en los próximos días.
                   </div>
 
-                  {todayAlerts.length > 0 && (
+                  {todayDeliveryAlerts.length > 0 && (
                     <div style={{ marginBottom: 14 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                        <span className="badge badge-danger">HOY</span>
-                        <span style={{ color: T.t2, fontSize: 12 }}>{todayAlerts.length} recogida{todayAlerts.length !== 1 ? "s" : ""}</span>
+                        <span style={{ background: T.greenDim, color: T.green, border: "1px solid " + T.greenBorder, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 500 }}>📦 ENTREGA HOY</span>
+                        <span style={{ color: T.t2, fontSize: 12 }}>{todayDeliveryAlerts.length}</span>
                       </div>
-                      {todayAlerts.map(function (r) {
+                      {todayDeliveryAlerts.map(function (r) {
+                        return (
+                          <div key={r.id} style={{ background: T.bg3, borderRadius: 8, padding: "10px 12px", marginBottom: 6, borderLeft: "3px solid " + T.green }}>
+                            <div style={{ fontWeight: 600, color: T.t1, marginBottom: 3 }}>{r.client}</div>
+                            <div style={{ fontSize: 12, color: T.t2 }}>{r.event} · {r.location}</div>
+                            <div style={{ fontSize: 11, color: T.t3, marginTop: 4 }}>
+                              {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {todayPickupAlerts.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <span className="badge badge-danger">🚚 RECOGIDA HOY</span>
+                        <span style={{ color: T.t2, fontSize: 12 }}>{todayPickupAlerts.length}</span>
+                      </div>
+                      {todayPickupAlerts.map(function (r) {
                         return (
                           <div key={r.id} style={{ background: T.bg3, borderRadius: 8, padding: "10px 12px", marginBottom: 6, borderLeft: "3px solid " + T.accent }}>
                             <div style={{ fontWeight: 600, color: T.t1, marginBottom: 3 }}>{r.client}</div>
@@ -1164,13 +1203,33 @@ export default function App() {
                     </div>
                   )}
 
-                  {tomorrowAlerts.length > 0 && (
+                  {tomorrowDeliveryAlerts.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <span style={{ background: T.greenDim, color: T.green, border: "1px solid " + T.greenBorder, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 500 }}>📦 ENTREGA MAÑANA</span>
+                        <span style={{ color: T.t2, fontSize: 12 }}>{tomorrowDeliveryAlerts.length}</span>
+                      </div>
+                      {tomorrowDeliveryAlerts.map(function (r) {
+                        return (
+                          <div key={r.id} style={{ background: T.bg3, borderRadius: 8, padding: "10px 12px", marginBottom: 6, borderLeft: "3px solid " + T.green }}>
+                            <div style={{ fontWeight: 600, color: T.t1, marginBottom: 3 }}>{r.client}</div>
+                            <div style={{ fontSize: 12, color: T.t2 }}>{r.event} · {r.location}</div>
+                            <div style={{ fontSize: 11, color: T.t3, marginTop: 4 }}>
+                              {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {tomorrowPickupAlerts.length > 0 && (
                     <div style={{ marginBottom: 8 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                        <span className="badge badge-warning">MAÑANA</span>
-                        <span style={{ color: T.t2, fontSize: 12 }}>{tomorrowAlerts.length} recogida{tomorrowAlerts.length !== 1 ? "s" : ""}</span>
+                        <span className="badge badge-warning">🚚 RECOGIDA MAÑANA</span>
+                        <span style={{ color: T.t2, fontSize: 12 }}>{tomorrowPickupAlerts.length}</span>
                       </div>
-                      {tomorrowAlerts.map(function (r) {
+                      {tomorrowPickupAlerts.map(function (r) {
                         return (
                           <div key={r.id} style={{ background: T.bg3, borderRadius: 8, padding: "10px 12px", marginBottom: 6, borderLeft: "3px solid " + T.amber }}>
                             <div style={{ fontWeight: 600, color: T.t1, marginBottom: 3 }}>{r.client}</div>
@@ -1197,7 +1256,7 @@ export default function App() {
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
                   <div style={{ fontSize: 40, marginBottom: 12 }}>✓</div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: T.t1, marginBottom: 6 }}>¡Todo al día!</div>
-                  <div style={{ color: T.t2, fontSize: 13 }}>No hay recogidas pendientes.</div>
+                  <div style={{ color: T.t2, fontSize: 13 }}>No hay alertas pendientes.</div>
                   <button className="btn btn-primary" onClick={function () { setShowWelcome(false); }} style={{ marginTop: 16 }}>
                     Continuar
                   </button>
@@ -1233,7 +1292,7 @@ export default function App() {
             <div className={"topbar-alert" + (totalAlerts === 0 ? " ok" : "")}>
               {totalAlerts === 0
                 ? "✓ Sin alertas"
-                : `● ${totalAlerts} alerta${totalAlerts !== 1 ? "s" : ""}`}
+                : `${deliveryAlerts.length > 0 ? "📦 " + deliveryAlerts.length : ""}${deliveryAlerts.length > 0 && pickupAlerts.length > 0 ? " · " : ""}${pickupAlerts.length > 0 ? "🚚 " + pickupAlerts.length : ""}`}
             </div>
             {import.meta.env.DEV && (
               <button
@@ -1291,154 +1350,90 @@ export default function App() {
                 <div className="metric-val">{activeRes}</div>
                 <div className="metric-hint">en curso</div>
               </div>
-              <div
-                className={
-                  "metric" + (todayPickups > 0 ? " alert" : " neutral")
-                }
-              >
-                <div className="metric-label">Recogidas hoy</div>
-                <div
-                  className={"metric-val" + (todayPickups > 0 ? " accent" : "")}
-                >
-                  {todayPickups}
-                </div>
-                <div className="metric-hint">
-                  {todayPickups > 0 ? "pendientes" : "al día"}
-                </div>
+              <div className={"metric" + (todayDeliveries > 0 ? " income" : " neutral")}>
+                <div className="metric-label">Entregas hoy</div>
+                <div className={"metric-val" + (todayDeliveries > 0 ? " green" : "")}>{todayDeliveries}</div>
+                <div className="metric-hint">{todayDeliveries > 0 ? "pendientes" : "al día"}</div>
               </div>
-              <div className="metric income">
-                <div className="metric-label">Ingresos est.</div>
-                <div className="metric-val green">
-                  {monthRevenue.toLocaleString("en-AW", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })}
-                </div>
-                <div className="metric-hint">AWG total</div>
+              <div className={"metric" + (todayPickups > 0 ? " alert" : " neutral")}>
+                <div className="metric-label">Recogidas hoy</div>
+                <div className={"metric-val" + (todayPickups > 0 ? " accent" : "")}>{todayPickups}</div>
+                <div className="metric-hint">{todayPickups > 0 ? "pendientes" : "al día"}</div>
               </div>
             </div>
 
-            <div className="card">
-              <div className="section-title">Recogidas próximas</div>
-              {pickupAlerts.length === 0 ? (
-                <div className="empty">
-                  <div className="empty-icon">✓</div>
-                  <div className="empty-label">Todo al día</div>
-                  <div className="empty-sub">Sin recogidas urgentes</div>
+            {deliveryAlerts.length > 0 && (
+              <div className="card">
+                <div className="section-title">
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ color: T.green }}>📦</span> Entregas próximas
+                  </span>
                 </div>
-              ) : (
-                pickupAlerts.map(function (r) {
+                {deliveryAlerts.map(function (r) {
+                  var isTodayDelivery = isToday(r.delivery);
                   return (
-                    <div key={r.id} className={"alert-item " + alertLevel(r)}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                        }}
-                      >
-                        <div className="alert-title">
-                          {r.client} — {r.event}
-                        </div>
-                        <span className={"badge badge-" + alertLevel(r)}>
-                          {isToday(r.pickup) ? "HOY" : "Mañana"}
+                    <div key={r.id} className={"alert-item " + (isTodayDelivery ? "danger" : "warning")} style={{ borderLeftColor: isTodayDelivery ? T.green : T.amber }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div className="alert-title">{r.client} — {r.event}</div>
+                        <span style={{ background: T.greenDim, color: T.green, border: "1px solid " + T.greenBorder, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 500 }}>
+                          {isTodayDelivery ? "ENTREGA HOY" : "ENTREGA MAÑANA"}
                         </span>
                       </div>
                       <div className="alert-sub" style={{ marginTop: 2 }}>
-                        {r.location} ·{" "}
-                        {r.items
-                          .map(function (i) {
-                            return i.qty + "× " + i.name;
-                          })
-                          .join(", ")}
+                        {r.location} · {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
                       </div>
                       <div className="row-actions">
-                        <button
-                          className="btn btn-sm btn-wa"
-                          onClick={function () {
-                            openWhatsApp(r.phone, buildWAMsg(r));
-                          }}
-                        >
-                          WhatsApp
+                        <button className="btn btn-sm" style={{ background: T.greenDim, color: T.green, borderColor: T.greenBorder }} onClick={function () { markDelivered(r.id); }}>
+                          Marcar entregado
                         </button>
-                        <button
-                          className="btn btn-sm btn-twilio"
-                          disabled={sendingWA}
-                          onClick={function () {
-                            sendTwilioReminder(r);
-                          }}
-                        >
-                          {sendingWA ? "Enviando…" : "Twilio WA"}
-                        </button>
-                        <button
-                          className="btn btn-sm"
-                          onClick={function () {
-                            markPickedUp(r.id);
-                          }}
-                        >
-                          Marcar recogido
-                        </button>
-                        <button
-                          className="btn btn-sm btn-accent"
-                          onClick={function () {
-                            handleGeneratePDF(r);
-                          }}
-                        >
-                          PDF
-                        </button>
+                        <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
                       </div>
                     </div>
                   );
-                })
-              )}
-            </div>
+                })}
+              </div>
+            )}
 
-            <div className="card">
-              <div className="section-title">Stock bajo</div>
-              {lowStock.length === 0 ? (
-                <div className="empty">
-                  <div className="empty-icon">✓</div>
-                  <div className="empty-label">Inventario en buen estado</div>
+            {pickupAlerts.length > 0 && (
+              <div className="card">
+                <div className="section-title">
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ color: T.accent }}>🚚</span> Recogidas próximas
+                  </span>
                 </div>
-              ) : (
-                lowStock.map(function (p) {
-                  var avail = p.total - p.rented;
-                  var pct = (avail / p.total) * 100;
+                {pickupAlerts.map(function (r) {
                   return (
-                    <div key={p.id} className="inv-row">
-                      <span style={{ fontSize: 13, color: T.t1 }}>
-                        {p.name}
-                      </span>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                        }}
-                      >
-                        <div className="progress">
-                          <div
-                            className="progress-fill"
-                            style={{
-                              width: pct + "%",
-                              background: pct < 15 ? T.accent : T.amber,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className={
-                            "badge " +
-                            (pct < 15 ? "badge-danger" : "badge-warning")
-                          }
-                        >
-                          {avail} / {p.total}
+                    <div key={r.id} className={"alert-item " + alertLevel(r)}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div className="alert-title">{r.client} — {r.event}</div>
+                        <span className={"badge badge-" + alertLevel(r)}>
+                          {isToday(r.pickup) ? "RECOGIDA HOY" : "RECOGIDA MAÑANA"}
                         </span>
                       </div>
+                      <div className="alert-sub" style={{ marginTop: 2 }}>
+                        {r.location} · {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                      </div>
+                      <div className="row-actions">
+                        <button className="btn btn-sm btn-wa" onClick={function () { openWhatsApp(r.phone, buildWAMsg(r)); }}>WhatsApp</button>
+                        <button className="btn btn-sm btn-twilio" disabled={sendingWA} onClick={function () { sendTwilioReminder(r); }}>{sendingWA ? "Enviando…" : "Twilio WA"}</button>
+                        <button className="btn btn-sm" onClick={function () { markPickedUp(r.id); }}>Marcar recogido</button>
+                        <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
+                      </div>
                     </div>
                   );
-                })
-              )}
-            </div>
+                })}
+              </div>
+            )}
+
+            {pickupAlerts.length === 0 && deliveryAlerts.length === 0 && (
+              <div className="card">
+                <div className="empty">
+                  <div className="empty-icon">✓</div>
+                  <div className="empty-label">Todo al día</div>
+                  <div className="empty-sub">Sin entregas ni recogidas urgentes</div>
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -1450,26 +1445,11 @@ export default function App() {
               <div className="form-row">
                 <div>
                   <label>Nombre del producto</label>
-                  <input
-                    value={pForm.name}
-                    onChange={function (e) {
-                      setPForm(function (f) {
-                        return Object.assign({}, f, { name: e.target.value });
-                      });
-                    }}
-                    placeholder="Ej: Silla Tiffany"
-                  />
+                  <input value={pForm.name} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { name: e.target.value }); }); }} placeholder="Ej: Silla Tiffany" />
                 </div>
                 <div>
                   <label>Unidad</label>
-                  <select
-                    value={pForm.unit}
-                    onChange={function (e) {
-                      setPForm(function (f) {
-                        return Object.assign({}, f, { unit: e.target.value });
-                      });
-                    }}
-                  >
+                  <select value={pForm.unit} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { unit: e.target.value }); }); }}>
                     <option value="unidad">Unidad</option>
                     <option value="set">Set</option>
                     <option value="metro">Metro</option>
@@ -1479,39 +1459,14 @@ export default function App() {
               <div className="form-row">
                 <div>
                   <label>Cantidad total</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={pForm.total}
-                    onChange={function (e) {
-                      setPForm(function (f) {
-                        return Object.assign({}, f, { total: +e.target.value });
-                      });
-                    }}
-                  />
+                  <input type="number" min="1" value={pForm.total} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { total: +e.target.value }); }); }} />
                 </div>
                 <div>
                   <label>Precio por día (AWG)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.50"
-                    value={pForm.price}
-                    onChange={function (e) {
-                      setPForm(function (f) {
-                        return Object.assign({}, f, { price: +e.target.value });
-                      });
-                    }}
-                  />
+                  <input type="number" min="0" step="0.50" value={pForm.price} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { price: +e.target.value }); }); }} />
                 </div>
               </div>
-              <button
-                className="btn btn-accent"
-                style={{ marginTop: 14 }}
-                onClick={addProduct}
-              >
-                + Agregar producto
-              </button>
+              <button className="btn btn-accent" style={{ marginTop: 14 }} onClick={addProduct}>+ Agregar producto</button>
             </div>
 
             <div className="inv-table-wrap">
@@ -1534,57 +1489,91 @@ export default function App() {
                         <td style={{ fontWeight: 500 }}>{p.name}</td>
                         <td style={{ color: T.t2 }}>{p.total}</td>
                         <td>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 8,
-                            }}
-                          >
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div className="progress">
-                              <div
-                                className="progress-fill"
-                                style={{
-                                  width: pct * 100 + "%",
-                                  background:
-                                    pct < 0.15
-                                      ? T.accent
-                                      : pct < 0.35
-                                        ? T.amber
-                                        : T.green,
-                                }}
-                              />
+                              <div className="progress-fill" style={{ width: pct * 100 + "%", background: pct < 0.15 ? T.accent : pct < 0.35 ? T.amber : T.green }} />
                             </div>
-                            <span style={{ color: T.t2, fontSize: 12 }}>
-                              {avail}
-                            </span>
+                            <span style={{ color: T.t2, fontSize: 12 }}>{avail}</span>
                           </div>
                         </td>
-                        <td
-                          style={{
-                            color: T.t2,
-                            fontFamily: "'JetBrains Mono', monospace",
-                            fontSize: 12,
-                          }}
-                        >
-                          AWG {p.price.toFixed(2)}
-                        </td>
+                        <td style={{ color: T.t2, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>AWG {p.price.toFixed(2)}</td>
                         <td>
-                          <span
-                            className={
-                              "badge " +
-                              (pct < 0.15
-                                ? "badge-danger"
-                                : pct < 0.35
-                                  ? "badge-warning"
-                                  : "badge-success")
-                            }
-                          >
-                            {pct < 0.15
-                              ? "Crítico"
-                              : pct < 0.35
-                                ? "Bajo"
-                                : "OK"}
+                          <span className={"badge " + (pct < 0.15 ? "badge-danger" : pct < 0.35 ? "badge-warning" : "badge-success")}>
+                            {pct < 0.15 ? "Crítico" : pct < 0.35 ? "Bajo" : "OK"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* ── INVENTARIO ── */}
+        {tab === "inventario" && (
+          <>
+            <div className="card">
+              <div className="section-title">Agregar producto</div>
+              <div className="form-row">
+                <div>
+                  <label>Nombre del producto</label>
+                  <input value={pForm.name} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { name: e.target.value }); }); }} placeholder="Ej: Silla Tiffany" />
+                </div>
+                <div>
+                  <label>Unidad</label>
+                  <select value={pForm.unit} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { unit: e.target.value }); }); }}>
+                    <option value="unidad">Unidad</option>
+                    <option value="set">Set</option>
+                    <option value="metro">Metro</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-row">
+                <div>
+                  <label>Cantidad total</label>
+                  <input type="number" min="1" value={pForm.total} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { total: +e.target.value }); }); }} />
+                </div>
+                <div>
+                  <label>Precio por día (AWG)</label>
+                  <input type="number" min="0" step="0.50" value={pForm.price} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { price: +e.target.value }); }); }} />
+                </div>
+              </div>
+              <button className="btn btn-accent" style={{ marginTop: 14 }} onClick={addProduct}>+ Agregar producto</button>
+            </div>
+
+            <div className="inv-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ padding: "10px 14px" }}>Producto</th>
+                    <th>Total</th>
+                    <th>Disponible</th>
+                    <th>Precio / día</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map(function (p) {
+                    var avail = p.total - p.rented;
+                    var pct = avail / p.total;
+                    return (
+                      <tr key={p.id}>
+                        <td style={{ fontWeight: 500 }}>{p.name}</td>
+                        <td style={{ color: T.t2 }}>{p.total}</td>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div className="progress">
+                              <div className="progress-fill" style={{ width: pct * 100 + "%", background: pct < 0.15 ? T.accent : pct < 0.35 ? T.amber : T.green }} />
+                            </div>
+                            <span style={{ color: T.t2, fontSize: 12 }}>{avail}</span>
+                          </div>
+                        </td>
+                        <td style={{ color: T.t2, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>AWG {p.price.toFixed(2)}</td>
+                        <td>
+                          <span className={"badge " + (pct < 0.15 ? "badge-danger" : pct < 0.35 ? "badge-warning" : "badge-success")}>
+                            {pct < 0.15 ? "Crítico" : pct < 0.35 ? "Bajo" : "OK"}
                           </span>
                         </td>
                       </tr>
