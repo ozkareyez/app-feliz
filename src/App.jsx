@@ -1212,7 +1212,9 @@ export default function App() {
         {/* TOP BAR */}
         <div className="topbar">
           <div className="topbar-left">
-            <img src="/fr.png" alt="Feliz RentEnterprise" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 3, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
+              <img src="/fr.png" alt="Feliz RentEnterprise" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+            </div>
             <div>
               <div className="topbar-title">Feliz RentEnterprise</div>
               <div className="topbar-sub">
