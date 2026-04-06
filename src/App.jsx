@@ -876,6 +876,7 @@ export default function App() {
   var [invoiceCounter, setInvoiceCounter] = useState(initCounter);
   var [sendingWA, setSendingWA] = useState(false);
   var [selectedAlert, setSelectedAlert] = useState(null);
+  var [viewReservation, setViewReservation] = useState(null);
   var [form, setForm] = useState({
     client: "",
     phone: "",
@@ -1857,6 +1858,14 @@ export default function App() {
                   </div>
                   <div className="row-actions">
                     <button
+                      className="btn btn-sm"
+                      onClick={function () {
+                        setViewReservation(r);
+                      }}
+                    >
+                      Ver
+                    </button>
+                    <button
                       className="btn btn-sm btn-accent"
                       onClick={function () {
                         handleGeneratePDF(r);
@@ -1871,15 +1880,6 @@ export default function App() {
                       }}
                     >
                       WhatsApp
-                    </button>
-                    <button
-                      className="btn btn-sm btn-twilio"
-                      disabled={sendingWA}
-                      onClick={function () {
-                        sendTwilioReminder(r);
-                      }}
-                    >
-                      {sendingWA ? "Enviando…" : "Twilio WA"}
                     </button>
                     {r.status !== "recogido" && (
                       <button
@@ -1901,8 +1901,8 @@ export default function App() {
         {/* ── ALERTAS ── */}
         {tab === "alertas" && (
           <>
-            <div className="section-title">Alertas de recogida</div>
-            {pickupAlerts.length === 0 ? (
+            <div className="section-title">Alertas de entrega y recogida</div>
+            {(pickupAlerts.length === 0 && deliveryAlerts.length === 0) ? (
               <div className="card">
                 <div className="empty">
                   <div className="empty-icon">✓</div>
@@ -1911,82 +1911,58 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              pickupAlerts.map(function (r) {
-                return (
-                  <div key={r.id} className={"alert-item " + alertLevel(r)}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <div className="alert-title">
-                        {r.client} — {r.event}
+              <>
+                {deliveryAlerts.map(function (r) {
+                  var isTodayDelivery = isToday(r.delivery);
+                  return (
+                    <div key={r.id} className="alert-item" style={{ borderLeftColor: isTodayDelivery ? T.green : T.amber, borderLeftWidth: 3, borderLeftStyle: "solid", background: T.bg3 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ background: isTodayDelivery ? T.greenDim : T.amberDim, color: isTodayDelivery ? T.green : T.amber, border: "1px solid " + (isTodayDelivery ? T.greenBorder : T.amberBorder), padding: "2px 10px", borderRadius: 20, fontSize: 10, fontWeight: 600, textTransform: "uppercase" }}>
+                            📦 {isTodayDelivery ? "ENTREGA HOY" : "ENTREGA MAÑANA"}
+                          </span>
+                        </div>
                       </div>
-                      <span className={"badge badge-" + alertLevel(r)}>
-                        {isToday(r.pickup) ? "HOY" : "Mañana"}
-                      </span>
+                      <div className="alert-title" style={{ color: T.t1 }}>{r.client} — {r.event}</div>
+                      <div className="alert-sub" style={{ color: T.t2 }}>{r.location}</div>
+                      <div className="alert-sub" style={{ marginTop: 4, color: T.t3 }}>
+                        {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(" · ")}
+                      </div>
+                      <div className="row-actions">
+                        <button className="btn btn-sm" style={{ background: T.greenDim, color: T.green, borderColor: T.greenBorder }} onClick={function () { setSelectedAlert(r); }}>Ver detalle</button>
+                        <button className="btn btn-sm" style={{ background: T.greenDim, color: T.green, borderColor: T.greenBorder }} onClick={function () { markDelivered(r.id); }}>Marcar entregado</button>
+                        <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
+                      </div>
                     </div>
-                    <div className="alert-sub">{r.location}</div>
-                    <div className="alert-sub" style={{ marginTop: 2 }}>
-                      {r.items
-                        .map(function (i) {
-                          return i.qty + "× " + i.name;
-                        })
-                        .join(" · ")}
+                  );
+                })}
+
+                {pickupAlerts.map(function (r) {
+                  return (
+                    <div key={r.id} className={"alert-item " + alertLevel(r)}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span className={"badge badge-" + alertLevel(r)} style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px" }}>
+                            🚚 {isToday(r.pickup) ? "RECOGIDA HOY" : "RECOGIDA MAÑANA"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="alert-title">{r.client} — {r.event}</div>
+                      <div className="alert-sub">{r.location}</div>
+                      <div className="alert-sub" style={{ marginTop: 2 }}>
+                        {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(" · ")}
+                      </div>
+                      <div className="row-actions">
+                        <button className="btn btn-sm" style={{ background: "rgba(99,102,241,0.12)", color: "#a5b4fc", borderColor: "rgba(99,102,241,0.35)" }} onClick={function () { setSelectedAlert(r); }}>Ver detalle</button>
+                        <button className="btn btn-sm btn-wa" onClick={function () { openWhatsApp(r.phone, buildWAMsg(r)); }}>WhatsApp</button>
+                        <button className="btn btn-sm btn-twilio" disabled={sendingWA} onClick={function () { sendTwilioReminder(r); }}>{sendingWA ? "Enviando…" : "Twilio WA"}</button>
+                        <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
+                        <button className="btn btn-sm" onClick={function () { markPickedUp(r.id); }}>Marcar recogido</button>
+                      </div>
                     </div>
-                    <div className="row-actions">
-                      <button
-                        className="btn btn-sm"
-                        style={{
-                          background: "rgba(99,102,241,0.12)",
-                          color: "#a5b4fc",
-                          borderColor: "rgba(99,102,241,0.35)",
-                        }}
-                        onClick={function () {
-                          setSelectedAlert(r);
-                        }}
-                      >
-                        Ver detalle
-                      </button>
-                      <button
-                        className="btn btn-sm btn-wa"
-                        onClick={function () {
-                          openWhatsApp(r.phone, buildWAMsg(r));
-                        }}
-                      >
-                        WhatsApp
-                      </button>
-                      <button
-                        className="btn btn-sm btn-twilio"
-                        disabled={sendingWA}
-                        onClick={function () {
-                          sendTwilioReminder(r);
-                        }}
-                      >
-                        {sendingWA ? "Enviando…" : "Twilio WA"}
-                      </button>
-                      <button
-                        className="btn btn-sm btn-accent"
-                        onClick={function () {
-                          handleGeneratePDF(r);
-                        }}
-                      >
-                        PDF
-                      </button>
-                      <button
-                        className="btn btn-sm"
-                        onClick={function () {
-                          markPickedUp(r.id);
-                        }}
-                      >
-                        Marcar recogido
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
+                  );
+                })}
+              </>
             )}
 
             <div className="section-title" style={{ marginTop: 20 }}>
@@ -2029,7 +2005,7 @@ export default function App() {
                   }}
                 >
                   <div className="modal-header">
-                    <h2>Detalle de recogida</h2>
+                    <h2>Detalle de alerta</h2>
                     <button
                       className="modal-close"
                       onClick={function () {
@@ -2055,7 +2031,8 @@ export default function App() {
                           ["Evento", selectedAlert.event],
                           ["Teléfono", selectedAlert.phone],
                           ["Ubicación", selectedAlert.location],
-                          ["Fecha recogida", formatDate(selectedAlert.pickup)],
+                          ["Entrega", formatDate(selectedAlert.delivery)],
+                          ["Recogida", formatDate(selectedAlert.pickup)],
                         ].map(function ([label, val]) {
                           return (
                             <div key={label} className="modal-info-item">
@@ -2139,8 +2116,66 @@ export default function App() {
                           setSelectedAlert(null);
                         }}
                       >
-                        Marcar recogido
+                        Marcar recogida
                       </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {viewReservation && (
+              <div className="modal-overlay" onClick={function () { setViewReservation(null); }}>
+                <div className="modal-content" onClick={function (e) { e.stopPropagation(); }}>
+                  <div className="modal-header">
+                    <h2>Detalle de Reserva</h2>
+                    <button className="modal-close" onClick={function () { setViewReservation(null); }}>✕</button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="modal-section">
+                      <div className="modal-section-title">Cliente</div>
+                      <div style={{ fontSize: 16, fontWeight: 600, color: T.t1 }}>{viewReservation.client}</div>
+                    </div>
+                    <div className="modal-section">
+                      <div className="modal-section-title">Información</div>
+                      <div className="modal-info">
+                        {[["Evento", viewReservation.event], ["Teléfono", viewReservation.phone], ["Ubicación", viewReservation.location], ["Fecha entrega", formatDate(viewReservation.delivery)], ["Fecha recogida", formatDate(viewReservation.pickup)]].map(function ([label, val]) {
+                          return (
+                            <div key={label} className="modal-info-item">
+                              <div className="modal-info-label">{label}</div>
+                              <div className="modal-info-value">{val}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="modal-section">
+                      <div className="modal-section-title">Productos</div>
+                      <div className="modal-products">
+                        <div className="modal-product-header">
+                          <span>Producto</span>
+                          <span style={{ textAlign: "center" }}>Cant.</span>
+                          <span style={{ textAlign: "right" }}>Precio</span>
+                        </div>
+                        {viewReservation.items.map(function (item, idx) {
+                          var prod = products.find(function (p) { return p.name === item.name; });
+                          return (
+                            <div key={idx} className="modal-product-row">
+                              <span>{item.name}</span>
+                              <span className="modal-product-qty">{item.qty}</span>
+                              <span className="modal-product-price">AWG {(item.price || (prod ? prod.price : 0)).toFixed(2)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="modal-total">
+                        <span className="modal-total-label">Total (incl. BBO)</span>
+                        <span className="modal-total-value">AWG {(resTotal(viewReservation) * 1.015).toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="row-actions" style={{ justifyContent: "center", marginTop: 4 }}>
+                      <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(viewReservation); }}>PDF</button>
+                      <button className="btn btn-sm btn-wa" onClick={function () { openWhatsApp(viewReservation.phone, buildWAInvoice(viewReservation, resTotal(viewReservation))); }}>WhatsApp</button>
                     </div>
                   </div>
                 </div>
