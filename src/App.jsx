@@ -873,7 +873,6 @@ export default function App() {
   var [notification, setNotification] = useState(null);
   var [showWelcome, setShowWelcome] = useState(false);
   var [invoiceCounter, setInvoiceCounter] = useState(initCounter);
-  var [sendingWA, setSendingWA] = useState(false);
   var [selectedAlert, setSelectedAlert] = useState(null);
   var [viewReservation, setViewReservation] = useState(null);
   var [form, setForm] = useState({
@@ -1014,36 +1013,6 @@ export default function App() {
       "https://wa.me/" + clean + "?text=" + encodeURIComponent(msg),
       "_blank",
     );
-  }
-
-  function sendTwilioReminder(res) {
-    setSendingWA(true);
-    fetch("http://localhost:3001/api/whatsapp-reminder", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        phone: res.phone,
-        client: res.client,
-        event: res.event,
-        location: res.location,
-        pickup: formatDate(res.pickup),
-        items: res.items,
-      }),
-    })
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (d) {
-        notify(
-          d.success ? "Mensaje enviado por WhatsApp" : "Error: " + d.error,
-        );
-      })
-      .catch(function () {
-        notify("Error de conexion con el servidor");
-      })
-      .finally(function () {
-        setSendingWA(false);
-      });
   }
 
   function handleGeneratePDF(res) {
