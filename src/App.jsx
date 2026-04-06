@@ -874,7 +874,6 @@ export default function App() {
   var [showWelcome, setShowWelcome] = useState(false);
   var [invoiceCounter, setInvoiceCounter] = useState(initCounter);
   var [selectedAlert, setSelectedAlert] = useState(null);
-  var [viewReservation, setViewReservation] = useState(null);
   var [form, setForm] = useState({
     client: "",
     phone: "",
@@ -1751,11 +1750,11 @@ export default function App() {
                       );
                     })}
                   </div>
-                  <div className="row-actions">
+                    <div className="row-actions">
                     <button
                       className="btn btn-sm"
                       onClick={function () {
-                        setViewReservation(r);
+                        setSelectedAlert(r);
                       }}
                     >
                       Ver
@@ -2004,64 +2003,6 @@ export default function App() {
                       >
                         Marcar recogida
                       </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {viewReservation && (
-              <div className="modal-overlay" onClick={function () { setViewReservation(null); }}>
-                <div className="modal-content" onClick={function (e) { e.stopPropagation(); }}>
-                  <div className="modal-header">
-                    <h2>Detalle de Reserva</h2>
-                    <button className="modal-close" onClick={function () { setViewReservation(null); }}>✕</button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="modal-section">
-                      <div className="modal-section-title">Cliente</div>
-                      <div style={{ fontSize: 16, fontWeight: 600, color: T.t1 }}>{viewReservation.client}</div>
-                    </div>
-                    <div className="modal-section">
-                      <div className="modal-section-title">Información</div>
-                      <div className="modal-info">
-                        {[["Evento", viewReservation.event], ["Teléfono", viewReservation.phone], ["Ubicación", viewReservation.location], ["Fecha entrega", formatDate(viewReservation.delivery)], ["Fecha recogida", formatDate(viewReservation.pickup)]].map(function ([label, val]) {
-                          return (
-                            <div key={label} className="modal-info-item">
-                              <div className="modal-info-label">{label}</div>
-                              <div className="modal-info-value">{val}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className="modal-section">
-                      <div className="modal-section-title">Productos</div>
-                      <div className="modal-products">
-                        <div className="modal-product-header">
-                          <span>Producto</span>
-                          <span style={{ textAlign: "center" }}>Cant.</span>
-                          <span style={{ textAlign: "right" }}>Precio</span>
-                        </div>
-                        {viewReservation.items.map(function (item, idx) {
-                          var prod = products.find(function (p) { return p.name === item.name; });
-                          return (
-                            <div key={idx} className="modal-product-row">
-                              <span>{item.name}</span>
-                              <span className="modal-product-qty">{item.qty}</span>
-                              <span className="modal-product-price">AWG {(item.price || (prod ? prod.price : 0)).toFixed(2)}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="modal-total">
-                        <span className="modal-total-label">Total (incl. BBO)</span>
-                        <span className="modal-total-value">AWG {(resTotal(viewReservation) * 1.015).toFixed(2)}</span>
-                      </div>
-                    </div>
-                    <div className="row-actions" style={{ justifyContent: "center", marginTop: 4 }}>
-                      <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(viewReservation); }}>PDF</button>
-                      <button className="btn btn-sm btn-wa" onClick={function () { openWhatsApp(viewReservation.phone, buildWAInvoice(viewReservation, resTotal(viewReservation))); }}>WhatsApp</button>
                     </div>
                   </div>
                 </div>
