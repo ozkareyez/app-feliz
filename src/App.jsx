@@ -606,7 +606,6 @@ body {
 .btn-twilio:hover { background: rgba(96,165,250,0.15); }
 
 .btn-sm { padding: 5px 11px; font-size: 11px; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .row-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 
@@ -1360,63 +1359,64 @@ export default function App() {
               </div>
             </div>
 
-            {deliveryAlerts.length > 0 && (
-              <div className="card">
-                <div className="section-title">
-                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ color: T.green }}>📦</span> Entregas próximas
-                  </span>
+            {todayDeliveries > 0 || todayPickups > 0 ? (
+              <div className="card" style={{ padding: 0 }}>
+                <div style={{ padding: "14px 18px", borderBottom: "1px solid " + T.b1, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>📅</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.t1 }}>Actividades de hoy</span>
                 </div>
-                {deliveryAlerts.map(function (r) {
-                  var isTodayDelivery = isToday(r.delivery);
+                {deliveryAlerts.filter(function(r) { return isToday(r.delivery); }).map(function (r) {
                   return (
-                    <div key={r.id} className={"alert-item " + (isTodayDelivery ? "danger" : "warning")} style={{ borderLeftColor: isTodayDelivery ? T.green : T.amber }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div className="alert-title">{r.client} — {r.event}</div>
-                        <span style={{ background: T.greenDim, color: T.green, border: "1px solid " + T.greenBorder, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 500 }}>
-                          {isTodayDelivery ? "ENTREGA HOY" : "ENTREGA MAÑANA"}
-                        </span>
+                    <div key={r.id} style={{ padding: "12px 18px", borderBottom: "1px solid " + T.b1, display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.green, boxShadow: "0 0 8px " + T.green }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: T.t1 }}>{r.client}</div>
+                        <div style={{ fontSize: 11, color: T.t3 }}>{r.event} · {r.items.map(function(i) { return i.qty + "× " + i.name; }).join(", ")}</div>
                       </div>
-                      <div className="alert-sub" style={{ marginTop: 2 }}>
-                        {r.location} · {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                      <span style={{ background: T.greenDim, color: T.green, border: "1px solid " + T.greenBorder, padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 500 }}>📦 ENTREGA</span>
+                    </div>
+                  );
+                })}
+                {pickupAlerts.filter(function(r) { return isToday(r.pickup); }).map(function (r) {
+                  return (
+                    <div key={r.id} style={{ padding: "12px 18px", borderBottom: "1px solid " + T.b1, display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.accent, boxShadow: "0 0 8px " + T.accent }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: T.t1 }}>{r.client}</div>
+                        <div style={{ fontSize: 11, color: T.t3 }}>{r.event} · {r.items.map(function(i) { return i.qty + "× " + i.name; }).join(", ")}</div>
                       </div>
-                      <div className="row-actions">
-                        <button className="btn btn-sm" style={{ background: T.greenDim, color: T.green, borderColor: T.greenBorder }} onClick={function () { markDelivered(r.id); }}>
-                          Marcar entregado
-                        </button>
-                        <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
-                      </div>
+                      <span className="badge badge-danger">🚚 RECOGIDA</span>
                     </div>
                   );
                 })}
               </div>
-            )}
+            ) : null}
 
-            {pickupAlerts.length > 0 && (
-              <div className="card">
-                <div className="section-title">
-                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ color: T.accent }}>🚚</span> Recogidas próximas
-                  </span>
+            {(deliveryAlerts.filter(function(r) { return isTomorrow(r.delivery); }).length > 0 || pickupAlerts.filter(function(r) { return isTomorrow(r.pickup); }).length > 0) && (
+              <div className="card" style={{ padding: 0 }}>
+                <div style={{ padding: "14px 18px", borderBottom: "1px solid " + T.b1, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>📆</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.t1 }}>Próximas (mañana)</span>
                 </div>
-                {pickupAlerts.map(function (r) {
+                {deliveryAlerts.filter(function(r) { return isTomorrow(r.delivery); }).map(function (r) {
                   return (
-                    <div key={r.id} className={"alert-item " + alertLevel(r)}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div className="alert-title">{r.client} — {r.event}</div>
-                        <span className={"badge badge-" + alertLevel(r)}>
-                          {isToday(r.pickup) ? "RECOGIDA HOY" : "RECOGIDA MAÑANA"}
-                        </span>
+                    <div key={r.id} style={{ padding: "10px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.amber }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 12, color: T.t1 }}>{r.client} - {r.event}</div>
                       </div>
-                      <div className="alert-sub" style={{ marginTop: 2 }}>
-                        {r.location} · {r.items.map(function (i) { return i.qty + "× " + i.name; }).join(", ")}
+                      <span style={{ color: T.amber, fontSize: 10, fontWeight: 500 }}>📦 MAÑANA</span>
+                    </div>
+                  );
+                })}
+                {pickupAlerts.filter(function(r) { return isTomorrow(r.pickup); }).map(function (r) {
+                  return (
+                    <div key={r.id} style={{ padding: "10px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: T.amber }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 12, color: T.t1 }}>{r.client} - {r.event}</div>
                       </div>
-                      <div className="row-actions">
-                        <button className="btn btn-sm btn-wa" onClick={function () { openWhatsApp(r.phone, buildWAMsg(r)); }}>WhatsApp</button>
-                        <button className="btn btn-sm btn-twilio" disabled={sendingWA} onClick={function () { sendTwilioReminder(r); }}>{sendingWA ? "Enviando…" : "Twilio WA"}</button>
-                        <button className="btn btn-sm" onClick={function () { markPickedUp(r.id); }}>Marcar recogido</button>
-                        <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
-                      </div>
+                      <span style={{ color: T.amber, fontSize: 10, fontWeight: 500 }}>🚚 MAÑANA</span>
                     </div>
                   );
                 })}
@@ -1428,84 +1428,10 @@ export default function App() {
                 <div className="empty">
                   <div className="empty-icon">✓</div>
                   <div className="empty-label">Todo al día</div>
-                  <div className="empty-sub">Sin entregas ni recogidas urgentes</div>
+                  <div className="empty-sub">Sin entregas ni recogidas pendientes</div>
                 </div>
               </div>
             )}
-          </>
-        )}
-
-        {/* ── INVENTARIO ── */}
-        {tab === "inventario" && (
-          <>
-            <div className="card">
-              <div className="section-title">Agregar producto</div>
-              <div className="form-row">
-                <div>
-                  <label>Nombre del producto</label>
-                  <input value={pForm.name} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { name: e.target.value }); }); }} placeholder="Ej: Silla Tiffany" />
-                </div>
-                <div>
-                  <label>Unidad</label>
-                  <select value={pForm.unit} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { unit: e.target.value }); }); }}>
-                    <option value="unidad">Unidad</option>
-                    <option value="set">Set</option>
-                    <option value="metro">Metro</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-row">
-                <div>
-                  <label>Cantidad total</label>
-                  <input type="number" min="1" value={pForm.total} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { total: +e.target.value }); }); }} />
-                </div>
-                <div>
-                  <label>Precio por día (AWG)</label>
-                  <input type="number" min="0" step="0.50" value={pForm.price} onChange={function (e) { setPForm(function (f) { return Object.assign({}, f, { price: +e.target.value }); }); }} />
-                </div>
-              </div>
-              <button className="btn btn-accent" style={{ marginTop: 14 }} onClick={addProduct}>+ Agregar producto</button>
-            </div>
-
-            <div className="inv-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ padding: "10px 14px" }}>Producto</th>
-                    <th>Total</th>
-                    <th>Disponible</th>
-                    <th>Precio / día</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map(function (p) {
-                    var avail = p.total - p.rented;
-                    var pct = avail / p.total;
-                    return (
-                      <tr key={p.id}>
-                        <td style={{ fontWeight: 500 }}>{p.name}</td>
-                        <td style={{ color: T.t2 }}>{p.total}</td>
-                        <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <div className="progress">
-                              <div className="progress-fill" style={{ width: pct * 100 + "%", background: pct < 0.15 ? T.accent : pct < 0.35 ? T.amber : T.green }} />
-                            </div>
-                            <span style={{ color: T.t2, fontSize: 12 }}>{avail}</span>
-                          </div>
-                        </td>
-                        <td style={{ color: T.t2, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>AWG {p.price.toFixed(2)}</td>
-                        <td>
-                          <span className={"badge " + (pct < 0.15 ? "badge-danger" : pct < 0.35 ? "badge-warning" : "badge-success")}>
-                            {pct < 0.15 ? "Crítico" : pct < 0.35 ? "Bajo" : "OK"}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
           </>
         )}
 
@@ -1955,7 +1881,6 @@ export default function App() {
                       <div className="row-actions">
                         <button className="btn btn-sm" style={{ background: "rgba(99,102,241,0.12)", color: "#a5b4fc", borderColor: "rgba(99,102,241,0.35)" }} onClick={function () { setSelectedAlert(r); }}>Ver detalle</button>
                         <button className="btn btn-sm btn-wa" onClick={function () { openWhatsApp(r.phone, buildWAMsg(r)); }}>WhatsApp</button>
-                        <button className="btn btn-sm btn-twilio" disabled={sendingWA} onClick={function () { sendTwilioReminder(r); }}>{sendingWA ? "Enviando…" : "Twilio WA"}</button>
                         <button className="btn btn-sm btn-accent" onClick={function () { handleGeneratePDF(r); }}>PDF</button>
                         <button className="btn btn-sm" onClick={function () { markPickedUp(r.id); }}>Marcar recogido</button>
                       </div>
@@ -2092,14 +2017,6 @@ export default function App() {
                         }}
                       >
                         WhatsApp
-                      </button>
-                      <button
-                        className="btn btn-sm btn-twilio"
-                        onClick={function () {
-                          sendTwilioReminder(selectedAlert);
-                        }}
-                      >
-                        Twilio WA
                       </button>
                       <button
                         className="btn btn-sm btn-accent"
